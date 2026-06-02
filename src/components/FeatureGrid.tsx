@@ -1,5 +1,5 @@
 import { Reveal } from '@/components/Reveal'
-import { GraduationCap, MessageSquare, Folder, Calendar, Trophy, Heart, Star } from 'lucide-react'
+import { GraduationCap, MessageSquare, Folder, Calendar, Trophy, Heart } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
@@ -11,10 +11,11 @@ const cards = [
       'Sua universidade corporativa. Acesse todos os cursos e trilhas de desenvolvimento preparadas para o seu crescimento profissional.',
     icon: GraduationCap,
     badge: 'Em Breve — Gravações a partir de Novembro/2026',
+    badgeVariant: 'yellow',
     button: 'Aguarde',
     disabled: true,
     href: '#',
-    special: null,
+    iconColor: null,
   },
   {
     title: 'Deixe sua Sugestão',
@@ -23,8 +24,8 @@ const cards = [
     icon: MessageSquare,
     button: 'Enviar Sugestão',
     disabled: false,
-    href: 'https://forms.google.com',
-    special: null,
+    href: 'https://docs.google.com/forms/d/e/1FAIpQLSdwEWQEAoIUzO1zob8qZXOoZ5SDPuLMWTFHO0gVxGsseiwylg/viewform?usp=publish-editor',
+    iconColor: null,
   },
   {
     title: 'Materiais do Evento',
@@ -33,28 +34,32 @@ const cards = [
     icon: Folder,
     button: 'Acessar Drive',
     disabled: false,
-    href: 'https://drive.google.com',
-    special: null,
+    href: 'https://drive.google.com/drive/folders/1OyUlcav-47Hyl7ZIGcZkywCTxDN5hXDU?usp=sharing',
+    iconColor: null,
   },
   {
     title: 'Calendário UniCredlar',
     description:
       'Fique por dentro dos próximos encontros, terapias em grupo, workshops e eventos corporativos.',
     icon: Calendar,
-    button: 'Ver Agenda',
-    disabled: false,
+    badge: 'Em Breve',
+    badgeVariant: 'gradient',
+    button: 'Aguarde',
+    disabled: true,
     href: '#',
-    special: null,
+    iconColor: null,
   },
   {
     title: 'Hall da Fama',
     description:
       'Reconhecimento àqueles que estão construindo um legado de excelência e resultados incríveis na Credlar.',
     icon: Trophy,
-    button: 'Conhecer',
-    disabled: false,
+    badge: 'Em Breve',
+    badgeVariant: 'gradient',
+    button: 'Aguarde',
+    disabled: true,
     href: '#',
-    special: 'gold',
+    iconColor: 'gold',
   },
   {
     title: 'Canal DHO Estratégico',
@@ -63,8 +68,8 @@ const cards = [
     icon: Heart,
     button: 'Falar com a DHO',
     disabled: false,
-    href: '#',
-    special: 'lilac',
+    href: 'https://docs.google.com/forms/d/e/1FAIpQLSfI8_L3B74gImXWv5OvIn-zcf312inkDEVe-fBnVp-kP25KkA/viewform?usp=publish-editor',
+    iconColor: 'lilac',
   },
 ]
 
@@ -85,20 +90,24 @@ export function FeatureGrid() {
                 )}
               >
                 <div className="bg-white rounded-[14px] h-full p-6 sm:p-8 flex flex-col relative overflow-hidden">
-                  {card.special === 'gold' && (
-                    <Star className="absolute -top-4 -right-4 w-32 h-32 text-brand-gold/10 fill-brand-gold/10 -rotate-12 transition-transform duration-500 group-hover:rotate-12" />
-                  )}
-                  {card.special === 'lilac' && (
-                    <Heart className="absolute -top-4 -right-4 w-32 h-32 text-brand-lilac/10 fill-brand-lilac/10 rotate-12 transition-transform duration-500 group-hover:-rotate-12" />
-                  )}
+                  <card.icon
+                    className={cn(
+                      'absolute -top-4 -right-4 w-32 h-32 -rotate-12 transition-transform duration-500 group-hover:rotate-12',
+                      card.iconColor === 'gold'
+                        ? 'text-brand-gold/10'
+                        : card.iconColor === 'lilac'
+                          ? 'text-brand-lilac/10'
+                          : 'text-gray-900/[0.04]',
+                    )}
+                  />
 
                   <div className="mb-6 flex justify-between items-start relative z-10">
                     <div
                       className={cn(
                         'w-14 h-14 rounded-full flex items-center justify-center bg-gray-50 border transition-colors duration-300',
-                        card.special === 'lilac'
+                        card.iconColor === 'lilac'
                           ? 'text-brand-lilac border-brand-lilac/20 group-hover:bg-brand-lilac/10'
-                          : card.special === 'gold'
+                          : card.iconColor === 'gold'
                             ? 'text-brand-gold border-brand-gold/20 group-hover:bg-brand-gold/10'
                             : 'text-gray-700 group-hover:text-brand-red',
                       )}
@@ -114,7 +123,12 @@ export function FeatureGrid() {
                   {card.badge && (
                     <Badge
                       variant="secondary"
-                      className="mb-4 bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 border-brand-yellow/20 w-fit text-[11px] uppercase tracking-wide"
+                      className={cn(
+                        'mb-4 w-fit text-[11px] uppercase tracking-wide',
+                        card.badgeVariant === 'gradient'
+                          ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white border-transparent hover:from-red-600 hover:to-orange-600'
+                          : 'bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 border-brand-yellow/20',
+                      )}
                     >
                       {card.badge}
                     </Badge>

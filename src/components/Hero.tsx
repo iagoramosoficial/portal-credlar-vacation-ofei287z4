@@ -1,6 +1,6 @@
 import { Reveal } from '@/components/Reveal'
-import credlarLogo from '@/assets/logo-credlar-vacation-43ae0.png'
-import unicredlarLogo from '@/assets/logo-unicredlar-e2fd3.png'
+import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
+import unicredlarLogo from '@/assets/unicredlar-branco-ec4dd.png'
 
 export function Hero() {
   return (

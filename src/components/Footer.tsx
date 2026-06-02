@@ -15,13 +15,18 @@ export function Footer() {
 
       <div className="container relative z-10 px-4 text-center flex flex-col items-center">
         <Reveal delay={100}>
-          <div className="mb-6 opacity-80 flex flex-col items-center select-none hover:opacity-100 transition-opacity duration-500">
+          <a
+            href="https://xdreams.com.br/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-6 opacity-80 flex flex-col items-center select-none hover:opacity-100 transition-opacity duration-500"
+          >
             <img
               src={xdreamsLogo}
               alt="XDreams Advisory"
               className="h-10 md:h-12 w-auto object-contain rounded-sm mix-blend-lighten"
             />
-          </div>
+          </a>
         </Reveal>
 
         <Reveal delay={200}>
