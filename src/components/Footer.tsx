@@ -1,4 +1,5 @@
 import { Reveal } from '@/components/Reveal'
+import xdreamsLogo from '@/assets/xdreams-advisory-fundo-preto-30871.png'
 
 export function Footer() {
   return (
@@ -14,19 +15,20 @@ export function Footer() {
 
       <div className="container relative z-10 px-4 text-center flex flex-col items-center">
         <Reveal delay={100}>
-          <div className="mb-6 opacity-40 flex flex-col items-center select-none hover:opacity-100 transition-opacity duration-500">
-            <span className="font-black tracking-widest text-xl mb-0.5">XDREAMS</span>
-            <span className="text-[10px] tracking-[0.4em] uppercase text-brand-yellow">
-              Advisory
-            </span>
+          <div className="mb-6 opacity-80 flex flex-col items-center select-none hover:opacity-100 transition-opacity duration-500">
+            <img
+              src={xdreamsLogo}
+              alt="XDreams Advisory"
+              className="h-10 md:h-12 w-auto object-contain rounded-sm mix-blend-lighten"
+            />
           </div>
         </Reveal>
 
         <Reveal delay={200}>
-          <p className="text-white/50 text-xs md:text-sm max-w-md mx-auto mb-16 uppercase tracking-wider">
+          <p className="text-white/60 text-xs md:text-sm max-w-md mx-auto mb-16 uppercase tracking-widest leading-relaxed">
             Em parceria estratégica com XDreams Advisory
             <br />
-            <span className="opacity-75">Governança e Metodologia LPP</span>
+            <span className="opacity-80 font-bold">Governança e Metodologia LPP</span>
           </p>
         </Reveal>
 

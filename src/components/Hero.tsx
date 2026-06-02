@@ -1,5 +1,6 @@
 import { Reveal } from '@/components/Reveal'
-import { Diamond } from 'lucide-react'
+import credlarLogo from '@/assets/logo-credlar-vacation-43ae0.png'
+import unicredlarLogo from '@/assets/logo-unicredlar-e2fd3.png'
 
 export function Hero() {
   return (
@@ -10,26 +11,24 @@ export function Hero() {
       <div className="container relative z-10 px-4 flex flex-col items-center text-center">
         <Reveal
           delay={100}
-          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-12 mb-16"
+          className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16 mb-16"
         >
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-brand flex items-center justify-center mb-4 shadow-elevation">
-              <Diamond className="text-white w-8 h-8 fill-white" />
-            </div>
-            <h2 className="text-white font-black tracking-widest text-xl leading-none">CREDLAR</h2>
-            <p className="text-white/80 tracking-[0.35em] text-[10px] mt-1 uppercase">Vacation</p>
+          <div className="flex flex-col items-center justify-center w-48 h-24 sm:w-64 sm:h-32">
+            <img
+              src={credlarLogo}
+              alt="Credlar Vacation"
+              className="w-full h-full object-contain drop-shadow-lg"
+            />
           </div>
 
-          <div className="hidden md:block w-px h-16 bg-white/20" />
+          <div className="hidden md:block w-px h-24 bg-white/20" />
 
-          <div className="flex flex-col items-center">
-            <div className="w-16 h-16 rounded-2xl border-2 border-white/20 flex items-center justify-center mb-4 bg-white/5 backdrop-blur-sm">
-              <span className="text-white font-bold text-3xl font-serif">U</span>
-            </div>
-            <h2 className="text-white font-black tracking-widest text-xl leading-none">
-              UNICREDLAR
-            </h2>
-            <p className="text-white/80 tracking-[0.2em] text-[10px] mt-1 uppercase">Educação</p>
+          <div className="flex flex-col items-center justify-center w-48 h-24 sm:w-64 sm:h-32">
+            <img
+              src={unicredlarLogo}
+              alt="UniCredlar"
+              className="w-full h-full object-contain drop-shadow-lg"
+            />
           </div>
         </Reveal>
 
@@ -42,7 +41,7 @@ export function Hero() {
         </Reveal>
 
         <Reveal delay={500}>
-          <p className="font-script text-3xl sm:text-4xl md:text-5xl text-white/90 font-light">
+          <p className="font-script text-3xl sm:text-4xl md:text-5xl text-white/90 font-light drop-shadow-sm">
             Seu veículo para a realização dos seus sonhos
           </p>
         </Reveal>

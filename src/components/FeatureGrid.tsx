@@ -77,10 +77,10 @@ export function FeatureGrid() {
             <Reveal key={index} delay={index * 100} className="h-full">
               <div
                 className={cn(
-                  'group relative rounded-2xl p-[2px] transition-all duration-300 h-full',
-                  'bg-transparent hover:bg-gradient-brand hover:-translate-y-1 shadow-sm hover:shadow-elevation',
+                  'group relative rounded-[16px] p-[2px] transition-all duration-300 h-full',
+                  'bg-border hover:bg-gradient-brand hover:-translate-y-1 shadow-sm hover:shadow-elevation',
                   card.disabled
-                    ? 'hover:bg-transparent hover:translate-y-0 shadow-none border border-border'
+                    ? 'hover:bg-border hover:translate-y-0 shadow-none border border-border'
                     : '',
                 )}
               >
@@ -107,7 +107,7 @@ export function FeatureGrid() {
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 relative z-10">
+                  <h3 className="text-xl font-bold text-gray-900 mb-3 relative z-10 uppercase font-sans tracking-wide">
                     {card.title}
                   </h3>
 
