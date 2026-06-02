@@ -1,4 +1,3 @@
-/* Tailwind config for the frontend react app. This is where the app theme should be defined: https://v2.tailwindcss.com/docs/configuration. */
 import type { Config } from 'tailwindcss'
 import animatePlugin from 'tailwindcss-animate'
 import typographyPlugin from '@tailwindcss/typography'
@@ -27,10 +26,21 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter var', 'SF Pro Display', 'system-ui', 'sans-serif'],
-        display: ['SF Pro Display', 'Inter var', 'system-ui', 'sans-serif'],
+        sans: ['Montserrat', 'Inter var', 'system-ui', 'sans-serif'],
+        display: ['Montserrat', 'system-ui', 'sans-serif'],
+        script: ['Dancing Script', 'cursive'],
       },
       colors: {
+        brand: {
+          red: '#CC1F1F',
+          orange: '#E85C1A',
+          yellow: '#F5A623',
+          lilac: '#9B5FC0',
+          gold: '#FFD700',
+          dark: '#0A0A0A',
+          darker: '#8B0000',
+          light: '#FAFAFA',
+        },
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -93,7 +103,7 @@ export default {
       },
       boxShadow: {
         subtle: '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
-        elevation: '0 4px 20px rgba(0, 0, 0, 0.05)',
+        elevation: '0 4px 20px rgba(0, 0, 0, 0.08)',
       },
       transitionTimingFunction: {
         apple: 'cubic-bezier(0.42, 0, 0.58, 1)',

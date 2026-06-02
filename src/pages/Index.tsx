@@ -1,12 +1,13 @@
-/* Home Page - Replace this page layout, components, content, behavior with what you want and translate to the language of the user */
-const Index = () => {
+import { Hero } from '@/components/Hero'
+import { FeatureGrid } from '@/components/FeatureGrid'
+import { Footer } from '@/components/Footer'
+
+export default function Index() {
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-6">
-        This is a example page ready to be rewritten with your own content
-      </h1>
+    <div className="w-full flex flex-col bg-brand-light min-h-screen font-sans overflow-x-hidden selection:bg-brand-red selection:text-white">
+      <Hero />
+      <FeatureGrid />
+      <Footer />
     </div>
   )
 }
-
-export default Index
