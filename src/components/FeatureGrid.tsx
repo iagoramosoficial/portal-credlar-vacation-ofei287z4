@@ -64,9 +64,9 @@ const cards = [
   {
     title: 'CANAL DHX ESTRATÉGICO',
     description:
-      'Apoio emocional, orientação de carreira e terapia corporativa voltada para o seu bem-estar completo.',
+      'Apoio emocional, orientação de carreira e mentoria corporativa voltada para o seu bem-estar completo.',
     icon: Heart,
-    button: 'Falar com a DHO',
+    button: 'Falar com a Mari',
     disabled: false,
     href: 'https://docs.google.com/forms/d/e/1FAIpQLSfI8_L3B74gImXWv5OvIn-zcf312inkDEVe-fBnVp-kP25KkA/viewform?usp=publish-editor',
     iconColor: 'lilac',
