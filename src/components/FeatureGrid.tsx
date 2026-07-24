@@ -62,7 +62,7 @@ const cards = [
     iconColor: 'gold',
   },
   {
-    title: 'Canal DHO Estratégico',
+    title: 'CANAL DHX ESTRATÉGICO',
     description:
       'Apoio emocional, orientação de carreira e terapia corporativa voltada para o seu bem-estar completo.',
     icon: Heart,
