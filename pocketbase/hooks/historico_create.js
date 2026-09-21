@@ -3,7 +3,17 @@ onRecordAfterCreateSuccess(
   (e) => {
     try {
       const collectionName = e.record.collection().name
-      const userId = e.auth && e.auth.id ? e.auth.id : 'sistema'
+      let userIdent = 'sistema'
+      if (e.auth) {
+        if (e.auth.email && typeof e.auth.email === 'function') {
+          userIdent = e.auth.email() || e.auth.id || 'sistema'
+        } else if (e.auth.email) {
+          userIdent = e.auth.email
+        } else if (e.auth.id) {
+          userIdent = e.auth.id
+        }
+      }
+
       let depois = null
       try {
         depois = e.record.publicExport ? e.record.publicExport() : null
@@ -14,7 +24,7 @@ onRecordAfterCreateSuccess(
       record.set('colecao', collectionName)
       record.set('registro_id', e.record.id)
       record.set('acao', 'criar')
-      record.set('usuario', userId)
+      record.set('usuario', userIdent)
       record.set('depois', depois)
       $app.save(record)
     } catch (err) {

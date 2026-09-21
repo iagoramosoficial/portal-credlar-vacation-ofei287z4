@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { ExternalLink } from 'lucide-react'
 import { ConfiguracoesSite } from '@/lib/conteudo-padrao'
+import { estaNoPeriodoAviso } from '@/lib/timezone'
 
 interface FaixaAvisoProps {
   config: ConfiguracoesSite
@@ -8,27 +9,10 @@ interface FaixaAvisoProps {
 
 export function FaixaAviso({ config }: FaixaAvisoProps) {
   const deveExibir = useMemo(() => {
-    if (!config.aviso_ativo || !config.aviso_texto?.trim()) {
+    if (!config.aviso_texto?.trim()) {
       return false
     }
-
-    const agora = new Date().getTime()
-
-    if (config.aviso_inicio) {
-      const dataInicio = new Date(config.aviso_inicio).getTime()
-      if (!isNaN(dataInicio) && agora < dataInicio) {
-        return false
-      }
-    }
-
-    if (config.aviso_fim) {
-      const dataFim = new Date(config.aviso_fim).getTime()
-      if (!isNaN(dataFim) && agora > dataFim) {
-        return false
-      }
-    }
-
-    return true
+    return estaNoPeriodoAviso(config.aviso_ativo, config.aviso_inicio, config.aviso_fim)
   }, [config.aviso_ativo, config.aviso_texto, config.aviso_inicio, config.aviso_fim])
 
   if (!deveExibir) {

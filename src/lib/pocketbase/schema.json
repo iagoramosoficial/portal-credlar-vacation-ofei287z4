@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T21:37:17.313Z",
+  "generatedAt": "2026-09-21T21:47:23.527Z",
   "collections": [
     {
       "name": "users",
@@ -51,7 +51,7 @@
         "list": "",
         "view": "",
         "create": null,
-        "update": null,
+        "update": "@request.auth.collectionName = \"usuarios_admin\"",
         "delete": null
       },
       "fields": [
@@ -154,11 +154,11 @@
       "name": "cards_home",
       "type": "base",
       "apiRules": {
-        "list": "status = \"publicado\"",
-        "view": "status = \"publicado\"",
-        "create": null,
-        "update": null,
-        "delete": null
+        "list": "status = \"publicado\" || @request.auth.collectionName = \"usuarios_admin\"",
+        "view": "status = \"publicado\" || @request.auth.collectionName = \"usuarios_admin\"",
+        "create": "@request.auth.collectionName = \"usuarios_admin\"",
+        "update": "@request.auth.collectionName = \"usuarios_admin\"",
+        "delete": "@request.auth.collectionName = \"usuarios_admin\""
       },
       "fields": [
         {
@@ -259,8 +259,8 @@
       "name": "cliques",
       "type": "base",
       "apiRules": {
-        "list": null,
-        "view": null,
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
         "create": "",
         "update": null,
         "delete": null
@@ -300,8 +300,8 @@
       "name": "historico",
       "type": "base",
       "apiRules": {
-        "list": null,
-        "view": null,
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
         "create": null,
         "update": null,
         "delete": null
@@ -360,6 +360,36 @@
         }
       ],
       "indexes": []
+    },
+    {
+      "name": "usuarios_admin",
+      "type": "auth",
+      "apiRules": {
+        "list": "@request.auth.id != \"\"",
+        "view": "@request.auth.id != \"\"",
+        "create": null,
+        "update": "@request.auth.id != \"\" && id = @request.auth.id",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "papel",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["admin", "dho"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey_pbc_1492831541` ON `usuarios_admin` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email_pbc_1492831541` ON `usuarios_admin` (`email`) WHERE `email` != ''"
+      ]
     }
   ]
 }
