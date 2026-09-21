@@ -1,7 +1,18 @@
 import { Reveal } from '@/components/Reveal'
 import xdreamsLogo from '@/assets/xdreams-advisory-fundo-preto-30871.png'
 
-export function Footer() {
+import { ConfiguracoesSite, CONFIGURACOES_PADRAO } from '@/lib/conteudo-padrao'
+
+interface FooterProps {
+  config?: ConfiguracoesSite
+}
+
+export function Footer({ config = CONFIGURACOES_PADRAO }: FooterProps) {
+  const parceria = config.rodape_parceria || CONFIGURACOES_PADRAO.rodape_parceria
+  const metodologia = config.rodape_metodologia || CONFIGURACOES_PADRAO.rodape_metodologia
+  const frase1 = config.rodape_frase_1 || CONFIGURACOES_PADRAO.rodape_frase_1
+  const frase2 = config.rodape_frase_2 || CONFIGURACOES_PADRAO.rodape_frase_2
+
   return (
     <footer className="relative bg-brand-dark text-white pt-32 pb-16 overflow-hidden mt-[-1px]">
       {/* Top wave transition from #FAFAFA */}
@@ -31,9 +42,9 @@ export function Footer() {
 
         <Reveal delay={200}>
           <p className="text-white/60 text-xs md:text-sm max-w-md mx-auto mb-16 uppercase tracking-widest leading-relaxed">
-            Em parceria estratégica com XDreams Advisory
+            {parceria}
             <br />
-            <span className="opacity-80 font-bold">Governança e Metodologia LPP</span>
+            <span className="opacity-80 font-bold">{metodologia}</span>
           </p>
         </Reveal>
 
@@ -41,8 +52,12 @@ export function Footer() {
           <div className="w-full max-w-3xl mx-auto px-4 py-8 border-t border-white/10 relative">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-8 h-px bg-brand-yellow/50" />
             <p className="font-script text-3xl md:text-4xl lg:text-5xl text-white/90 font-light leading-relaxed">
-              A Credlar Vacation é o veículo para a realização dos seus sonhos.
-              <br className="hidden md:block" /> Mas é você quem está no volante.
+              {frase1}
+              {frase2 && (
+                <>
+                  <br className="hidden md:block" /> {frase2}
+                </>
+              )}
             </p>
           </div>
         </Reveal>

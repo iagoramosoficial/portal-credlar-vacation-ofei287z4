@@ -2,7 +2,18 @@ import { Reveal } from '@/components/Reveal'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 import unicredlarLogo from '@/assets/unicredlar-branco-ec4dd.png'
 
-export function Hero() {
+import { ConfiguracoesSite, CONFIGURACOES_PADRAO } from '@/lib/conteudo-padrao'
+
+interface HeroProps {
+  config?: ConfiguracoesSite
+}
+
+export function Hero({ config = CONFIGURACOES_PADRAO }: HeroProps) {
+  const linha1 = config.hero_linha_1 || CONFIGURACOES_PADRAO.hero_linha_1
+  const destaque = config.hero_destaque || CONFIGURACOES_PADRAO.hero_destaque
+  const frase = config.hero_frase || CONFIGURACOES_PADRAO.hero_frase
+  const nomeEmpresa = config.nome_empresa || CONFIGURACOES_PADRAO.nome_empresa
+
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center items-center bg-gradient-to-b from-brand-dark to-brand-darker overflow-hidden pt-20 pb-32">
       {/* Background textures */}
@@ -16,7 +27,7 @@ export function Hero() {
           <div className="flex flex-col items-center justify-center w-48 h-24 sm:w-64 sm:h-32">
             <img
               src={credlarLogo}
-              alt="Credlar Vacation"
+              alt={nomeEmpresa}
               className="w-full h-full object-contain drop-shadow-lg"
             />
           </div>
@@ -34,15 +45,15 @@ export function Hero() {
 
         <Reveal delay={300} className="max-w-4xl mx-auto w-full">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white uppercase leading-[1.1] mb-8">
-            Bem-vindo ao
+            {linha1}
             <br />
-            <span className="text-gradient-brand drop-shadow-sm">Ecossistema Credlar</span>
+            <span className="text-gradient-brand drop-shadow-sm">{destaque}</span>
           </h1>
         </Reveal>
 
         <Reveal delay={500}>
           <p className="font-script text-3xl sm:text-4xl md:text-5xl text-white/90 font-light drop-shadow-sm">
-            Seu veículo para a realização dos seus sonhos
+            {frase}
           </p>
         </Reveal>
       </div>
