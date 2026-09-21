@@ -1,0 +1,365 @@
+{
+  "generatedAt": "2026-09-21T21:37:17.313Z",
+  "collections": [
+    {
+      "name": "users",
+      "type": "auth",
+      "apiRules": {
+        "list": "id = @request.auth.id",
+        "view": "id = @request.auth.id",
+        "create": "",
+        "update": "id = @request.auth.id",
+        "delete": "id = @request.auth.id"
+      },
+      "fields": [
+        {
+          "name": "name",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "avatar",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX `idx_tokenKey__pb_users_auth_` ON `users` (`tokenKey`)",
+        "CREATE UNIQUE INDEX `idx_email__pb_users_auth_` ON `users` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "configuracoes_site",
+      "type": "base",
+      "apiRules": {
+        "list": "",
+        "view": "",
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "nome_empresa",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "hero_linha_1",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "hero_destaque",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "hero_frase",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "rodape_parceria",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "rodape_metodologia",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "rodape_frase_1",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "rodape_frase_2",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "aviso_ativo",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "aviso_texto",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "aviso_link",
+          "type": "url",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "aviso_inicio",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "aviso_fim",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "cards_home",
+      "type": "base",
+      "apiRules": {
+        "list": "status = \"publicado\"",
+        "view": "status = \"publicado\"",
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "titulo",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "descricao",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "icone",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": [
+            "GraduationCap",
+            "MessageSquare",
+            "Folder",
+            "Calendar",
+            "Trophy",
+            "Heart"
+          ]
+        },
+        {
+          "name": "selo_texto",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "selo_estilo",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["amarelo", "gradiente"]
+        },
+        {
+          "name": "texto_botao",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "link",
+          "type": "url",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "clicavel",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_icone",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["padrao", "dourado", "lilas"]
+        },
+        {
+          "name": "ordem",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["rascunho", "publicado"]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "cliques",
+      "type": "base",
+      "apiRules": {
+        "list": null,
+        "view": null,
+        "create": "",
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "alvo",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "tipo",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["card", "link_curto"]
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "historico",
+      "type": "base",
+      "apiRules": {
+        "list": null,
+        "view": null,
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "colecao",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "registro_id",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "acao",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["criar", "editar", "excluir"]
+        },
+        {
+          "name": "usuario",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "antes",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "depois",
+          "type": "json",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    }
+  ]
+}

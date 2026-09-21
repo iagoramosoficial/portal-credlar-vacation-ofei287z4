@@ -19,8 +19,8 @@ export function useConteudoSite() {
       try {
         // Busca paralela de configurações e cards
         const [configRes, cardsRes] = await Promise.allSettled([
-          pb.collection<ConfiguracoesSite>('configuracoes_site').getFirstListItem(''),
-          pb.collection<CardHome>('cards_home').getFullList({
+          pb.collection('configuracoes_site').getFirstListItem<ConfiguracoesSite>(''),
+          pb.collection('cards_home').getFullList<CardHome>({
             filter: 'status = "publicado"',
             sort: 'ordem',
           }),

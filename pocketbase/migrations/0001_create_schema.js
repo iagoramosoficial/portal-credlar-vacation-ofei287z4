@@ -1,4 +1,3 @@
-/// <reference path="../pb_data/types.d.ts" />
 migrate(
   (app) => {
     // 1. configuracoes_site
@@ -71,6 +70,18 @@ migrate(
           name: 'aviso_fim',
           type: 'date',
         },
+        {
+          name: 'created',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: false,
+        },
+        {
+          name: 'updated',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: true,
+        },
       ],
     })
     app.save(configuracoesSite)
@@ -142,6 +153,18 @@ migrate(
           maxSelect: 1,
           values: ['rascunho', 'publicado'],
         },
+        {
+          name: 'created',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: false,
+        },
+        {
+          name: 'updated',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: true,
+        },
       ],
     })
     app.save(cardsHome)
@@ -167,6 +190,18 @@ migrate(
           required: true,
           maxSelect: 1,
           values: ['card', 'link_curto'],
+        },
+        {
+          name: 'created',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: false,
+        },
+        {
+          name: 'updated',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: true,
         },
       ],
     })
@@ -211,6 +246,18 @@ migrate(
         {
           name: 'depois',
           type: 'json',
+        },
+        {
+          name: 'created',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: false,
+        },
+        {
+          name: 'updated',
+          type: 'autodate',
+          onCreate: true,
+          onUpdate: true,
         },
       ],
     })
