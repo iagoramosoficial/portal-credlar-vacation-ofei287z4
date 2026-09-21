@@ -1,36 +1,44 @@
 // Hook de Exclusão (configuracoes_site e cards_home)
-onRecordAfterDeleteSuccess(
+// Intercepta a requisição HTTP para capturar e.auth e registrar auditoria com o e-mail do autor
+onRecordDeleteRequest(
   (e) => {
+    let antes = null
     try {
-      const collectionName = e.record.collection().name
-      let userIdent = 'sistema'
-      if (e.auth) {
-        if (e.auth.email && typeof e.auth.email === 'function') {
-          userIdent = e.auth.email() || e.auth.id || 'sistema'
-        } else if (e.auth.email) {
-          userIdent = e.auth.email
-        } else if (e.auth.id) {
-          userIdent = e.auth.id
-        }
+      antes = e.record.publicExport ? e.record.publicExport() : null
+    } catch (_) {}
+
+    const collectionName = e.record.collection().name
+    const recordId = e.record.id
+    let userIdent = 'sistema'
+
+    const authRecord = e.auth
+    if (authRecord) {
+      if (typeof authRecord.email === 'function') {
+        userIdent = authRecord.email() || authRecord.id || 'sistema'
+      } else if (authRecord.email) {
+        userIdent = authRecord.email
+      } else if (typeof authRecord.getString === 'function') {
+        userIdent = authRecord.getString('email') || authRecord.id || 'sistema'
+      } else if (authRecord.id) {
+        userIdent = authRecord.id
       }
+    }
 
-      let antes = null
-      try {
-        antes = e.record.publicExport ? e.record.publicExport() : null
-      } catch (_) {}
+    // Executa a exclusão do registro
+    e.next()
 
+    try {
       const historicoCol = $app.findCollectionByNameOrId('historico')
-      const record = new Record(historicoCol)
-      record.set('colecao', collectionName)
-      record.set('registro_id', e.record.id)
-      record.set('acao', 'excluir')
-      record.set('usuario', userIdent)
-      record.set('antes', antes)
-      $app.save(record)
+      const histRecord = new Record(historicoCol)
+      histRecord.set('colecao', collectionName)
+      histRecord.set('registro_id', recordId)
+      histRecord.set('acao', 'excluir')
+      histRecord.set('usuario', userIdent)
+      histRecord.set('antes', antes)
+      $app.save(histRecord)
     } catch (err) {
       console.log('Erro ao gravar historico de exclusao:', err)
     }
-    e.next()
   },
   'configuracoes_site',
   'cards_home',

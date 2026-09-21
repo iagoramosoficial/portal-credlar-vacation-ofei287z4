@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T21:47:23.527Z",
+  "generatedAt": "2026-09-21T21:58:43.533Z",
   "collections": [
     {
       "name": "users",
@@ -7,7 +7,7 @@
       "apiRules": {
         "list": "id = @request.auth.id",
         "view": "id = @request.auth.id",
-        "create": "",
+        "create": null,
         "update": "id = @request.auth.id",
         "delete": "id = @request.auth.id"
       },
@@ -365,10 +365,10 @@
       "name": "usuarios_admin",
       "type": "auth",
       "apiRules": {
-        "list": "@request.auth.id != \"\"",
-        "view": "@request.auth.id != \"\"",
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
         "create": null,
-        "update": "@request.auth.id != \"\" && id = @request.auth.id",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && id = @request.auth.id && @request.body.papel:isset = false",
         "delete": null
       },
       "fields": [
