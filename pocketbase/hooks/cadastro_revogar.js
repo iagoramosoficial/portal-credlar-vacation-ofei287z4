@@ -1,7 +1,8 @@
 // Rota: POST /api/cadastro/{token}/revogar
 // Público. Só para status "autorizado".
 // Define status "revogado", APAGA a foto imediatamente e registra em consentimentos (acao revogacao, origem portal, registrado_por "titular").
-// Após autorizar, o mesmo link continua válido apenas para revogação.
+// A atualização do líder e a criação do registro em consentimentos devem acontecer dentro de UMA transação ($app.runInTransaction).
+// Se qualquer uma das gravações falhar, nada é salvo e a rota devolve erro.
 routerAdd('POST', '/backend/v1/cadastro/{token}/revogar', (e) => {
   const token = e.requestInfo().pathParams.token
   if (!token || token.length < 10) {
@@ -33,24 +34,30 @@ routerAdd('POST', '/backend/v1/cadastro/{token}/revogar', (e) => {
     } catch (_) {}
   }
 
-  lider.set('status', 'revogado')
-  lider.set('foto', null)
-  $app.save(lider)
-
   try {
-    const consentimentosCol = $app.findCollectionByNameOrId('consentimentos')
-    const consRecord = new Record(consentimentosCol)
-    consRecord.set('lider', lider.id)
-    if (termoAceitoId) {
-      consRecord.set('termo', termoAceitoId)
-      consRecord.set('versao_termo', versaoTermo)
-    }
-    consRecord.set('acao', 'revogacao')
-    consRecord.set('origem', 'portal')
-    consRecord.set('registrado_por', 'titular')
-    $app.save(consRecord)
+    $app.runInTransaction((txApp) => {
+      const txLider = txApp.findFirstRecordByData('lideres', 'id', lider.id)
+      txLider.set('status', 'revogado')
+      txLider.set('foto', null)
+      txApp.save(txLider)
+
+      const consentimentosCol = txApp.findCollectionByNameOrId('consentimentos')
+      const consRecord = new Record(consentimentosCol)
+      consRecord.set('lider', txLider.id)
+      if (termoAceitoId) {
+        consRecord.set('termo', termoAceitoId)
+        consRecord.set('versao_termo', versaoTermo)
+      }
+      consRecord.set('acao', 'revogacao')
+      consRecord.set('origem', 'portal')
+      consRecord.set('registrado_por', 'titular')
+      txApp.save(consRecord)
+    })
   } catch (err) {
-    console.log('Erro ao salvar consentimento de revogacao:', err)
+    console.log('Erro na transação de revogação pelo titular:', err)
+    return e.json(500, {
+      message: 'Erro ao revogar autorização. Por favor, tente novamente.',
+    })
   }
 
   return e.json(200, {

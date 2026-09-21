@@ -30,6 +30,7 @@ import {
 } from '@/components/ui/dialog'
 
 interface TermoData {
+  id: string
   titulo: string
   versao: number
   conteudo: string
@@ -186,6 +187,9 @@ export const CadastroLiderPage: React.FC = () => {
       }
       formData.append('foto', fotoArquivo)
       formData.append('aceite', 'true')
+      if (dadosConvite?.termo?.id) {
+        formData.append('termo_id', dadosConvite.termo.id)
+      }
 
       await pb.send(`/backend/v1/cadastro/${token}/aceitar`, {
         method: 'POST',

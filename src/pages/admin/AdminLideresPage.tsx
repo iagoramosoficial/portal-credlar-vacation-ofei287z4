@@ -647,24 +647,26 @@ export const AdminLideresPage: React.FC = () => {
                           className="flex items-center justify-end gap-1"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {/* Botão Gerar / Reenviar Convite */}
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => handleGerarConvite(lider, e)}
-                            disabled={!termoVigente || gerandoConviteId === lider.id}
-                            className="h-8 px-2.5 text-xs text-brand-orange hover:text-white hover:bg-brand-orange/20"
-                            title={
-                              !termoVigente
-                                ? 'Cadastre e torne vigente um termo de uso de imagem em Configurações antes de convidar.'
-                                : lider.status === 'convidado'
-                                  ? 'Gerar novo convite (substitui o anterior)'
-                                  : 'Gerar convite de autorização'
-                            }
-                          >
-                            <Link2 className="w-3.5 h-3.5 mr-1" />
-                            {lider.status === 'convidado' ? 'Reenviar' : 'Convite'}
-                          </Button>
+                          {/* Botão Gerar / Reenviar Convite (esconder se já autorizado) */}
+                          {lider.status !== 'autorizado' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleGerarConvite(lider, e)}
+                              disabled={!termoVigente || gerandoConviteId === lider.id}
+                              className="h-8 px-2.5 text-xs text-brand-orange hover:text-white hover:bg-brand-orange/20"
+                              title={
+                                !termoVigente
+                                  ? 'Cadastre e torne vigente um termo de uso de imagem em Configurações antes de convidar.'
+                                  : lider.status === 'convidado'
+                                    ? 'Gerar novo convite (substitui o anterior)'
+                                    : 'Gerar convite de autorização'
+                              }
+                            >
+                              <Link2 className="w-3.5 h-3.5 mr-1" />
+                              {lider.status === 'convidado' ? 'Reenviar' : 'Convite'}
+                            </Button>
+                          )}
 
                           {/* Editar */}
                           <Button
@@ -920,16 +922,18 @@ export const AdminLideresPage: React.FC = () => {
 
                 {/* Ações na Ficha */}
                 <div className="flex flex-col gap-2 shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={(e) => handleGerarConvite(liderSelecionado, e)}
-                    disabled={!termoVigente || gerandoConviteId === liderSelecionado.id}
-                    className="border-neutral-700 hover:bg-neutral-800 text-xs"
-                  >
-                    <Link2 className="w-3.5 h-3.5 mr-1 text-brand-orange" />
-                    Gerar Novo Convite
-                  </Button>
+                  {liderSelecionado.status !== 'autorizado' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => handleGerarConvite(liderSelecionado, e)}
+                      disabled={!termoVigente || gerandoConviteId === liderSelecionado.id}
+                      className="border-neutral-700 hover:bg-neutral-800 text-xs"
+                    >
+                      <Link2 className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                      Gerar Novo Convite
+                    </Button>
+                  )}
 
                   {liderSelecionado.status === 'autorizado' && (
                     <Button

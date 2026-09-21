@@ -1,6 +1,8 @@
 // Rota: POST /api/lideres/{id}/revogar
 // Somente usuarios_admin autenticados (para pedidos recebidos por e-mail).
 // Define status "revogado", APAGA a foto imediatamente e registra em consentimentos (acao revogacao, origem painel, registrado_por = email do usuario autenticado).
+// A atualização do líder e a criação do registro em consentimentos devem acontecer dentro de UMA transação ($app.runInTransaction).
+// Se qualquer uma das gravações falhar, nada é salvo e a rota devolve erro.
 routerAdd(
   'POST',
   '/backend/v1/lideres/{id}/revogar',
@@ -53,24 +55,30 @@ routerAdd(
       } catch (_) {}
     }
 
-    lider.set('status', 'revogado')
-    lider.set('foto', null)
-    $app.save(lider)
-
     try {
-      const consentimentosCol = $app.findCollectionByNameOrId('consentimentos')
-      const consRecord = new Record(consentimentosCol)
-      consRecord.set('lider', lider.id)
-      if (termoAceitoId) {
-        consRecord.set('termo', termoAceitoId)
-        consRecord.set('versao_termo', versaoTermo)
-      }
-      consRecord.set('acao', 'revogacao')
-      consRecord.set('origem', 'painel')
-      consRecord.set('registrado_por', adminEmail)
-      $app.save(consRecord)
+      $app.runInTransaction((txApp) => {
+        const txLider = txApp.findFirstRecordByData('lideres', 'id', lider.id)
+        txLider.set('status', 'revogado')
+        txLider.set('foto', null)
+        txApp.save(txLider)
+
+        const consentimentosCol = txApp.findCollectionByNameOrId('consentimentos')
+        const consRecord = new Record(consentimentosCol)
+        consRecord.set('lider', txLider.id)
+        if (termoAceitoId) {
+          consRecord.set('termo', termoAceitoId)
+          consRecord.set('versao_termo', versaoTermo)
+        }
+        consRecord.set('acao', 'revogacao')
+        consRecord.set('origem', 'painel')
+        consRecord.set('registrado_por', adminEmail)
+        txApp.save(consRecord)
+      })
     } catch (err) {
-      console.log('Erro ao salvar consentimento de revogacao pelo painel:', err)
+      console.log('Erro na transação de revogação pelo painel:', err)
+      return e.json(500, {
+        message: 'Erro ao revogar autorização pelo painel. Por favor, tente novamente.',
+      })
     }
 
     return e.json(200, {

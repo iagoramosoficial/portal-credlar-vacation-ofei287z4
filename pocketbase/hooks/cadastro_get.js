@@ -1,5 +1,5 @@
 // Rota: GET /api/cadastro/{token}
-// Público. Devolve APENAS: nome_exibicao (ou nome), status, data de validade e o termo uso_imagem vigente (título, versão, conteúdo).
+// Público. Devolve APENAS: nome_exibicao (ou nome), status, data de validade e o termo uso_imagem vigente (id, título, versão, conteúdo).
 // Token inválido ou expirado: mensagem genérica, sem revelar se o token existe.
 routerAdd('GET', '/backend/v1/cadastro/{token}', (e) => {
   const token = e.requestInfo().pathParams.token
@@ -62,6 +62,7 @@ routerAdd('GET', '/backend/v1/cadastro/{token}', (e) => {
     )
     if (termos && termos.length > 0) {
       termoVigente = {
+        id: termos[0].id,
         titulo: termos[0].getString('titulo'),
         versao: termos[0].getInt('versao'),
         conteudo: termos[0].getString('conteudo'),

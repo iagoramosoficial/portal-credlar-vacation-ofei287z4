@@ -1,8 +1,15 @@
 // Rota: POST /api/lideres/{id}/convite
 // Somente usuarios_admin autenticados (admin e dho).
+//
+// 2. CONVITE BLOQUEADO PARA QUEM JÁ AUTORIZOU:
+// - Recusar a geração de convite quando o status do líder for "autorizado", com a mensagem exata:
+//   "Este líder já autorizou. Para um novo convite, registre antes a revogação."
+// - Para os demais status (pendente, convidado, recusado, revogado), manter o comportamento atual.
+// - Remover o gerador alternativo com Math.random: usar somente $security.randomString(48); se indisponível, devolver erro.
+//
 // Se NÃO houver termo vigente do tipo uso_imagem, recusa com:
 // "Cadastre e torne vigente um termo de uso de imagem em Configurações antes de convidar."
-// Gera token aleatório seguro (>= 32 chars), define convite_expira_em com base em dias_validade_convite de parametros,
+// Gera token aleatório seguro (48 chars via $security.randomString(48)), define convite_expira_em com base em dias_validade_convite de parametros,
 // status "convidado", e devolve { link: "/cadastro/" + token, token: token, expira_em: convite_expira_em }.
 routerAdd(
   'POST',
@@ -28,6 +35,18 @@ routerAdd(
       liderRecord = $app.findFirstRecordByData('lideres', 'id', liderId)
     } catch (_) {
       return e.json(404, { message: 'Líder não encontrado.' })
+    }
+
+    if (!liderRecord) {
+      return e.json(404, { message: 'Líder não encontrado.' })
+    }
+
+    // Regra: Bloquear geração de convite para quem já autorizou
+    const currentStatus = liderRecord.getString('status')
+    if (currentStatus === 'autorizado') {
+      return e.json(400, {
+        message: 'Este líder já autorizou. Para um novo convite, registre antes a revogação.',
+      })
     }
 
     // Verificar se há termo de uso_imagem vigente
@@ -64,20 +83,20 @@ routerAdd(
       }
     } catch (_) {}
 
-    // Gerar token aleatório seguro de 48 caracteres alfanuméricos
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    // Gerador de token: usar SOMENTE $security.randomString(48). Se indisponível, devolver erro.
     let token = ''
     try {
       if (typeof $security !== 'undefined' && typeof $security.randomString === 'function') {
         token = $security.randomString(48)
       }
-    } catch (_) {}
+    } catch (err) {
+      console.log('Erro ao chamar $security.randomString:', err)
+    }
 
-    if (!token || token.length < 32) {
-      token = ''
-      for (let i = 0; i < 48; i++) {
-        token += chars.charAt(Math.floor(Math.random() * chars.length))
-      }
+    if (!token || token.length !== 48) {
+      return e.json(500, {
+        message: 'Serviço de geração de token criptográfico indisponível.',
+      })
     }
 
     // Calcular data de expiração (UTC ISO)

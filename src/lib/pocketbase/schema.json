@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T23:10:46.391Z",
+  "generatedAt": "2026-09-21T23:25:45.494Z",
   "collections": [
     {
       "name": "users",
@@ -601,9 +601,9 @@
       "apiRules": {
         "list": "@request.auth.collectionName = \"usuarios_admin\"",
         "view": "@request.auth.collectionName = \"usuarios_admin\"",
-        "create": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false",
-        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false",
-        "delete": "@request.auth.collectionName = \"usuarios_admin\""
+        "create": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false && @request.body.foto:isset = false",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false && @request.body.foto:isset = false",
+        "delete": "@request.auth.collectionName = \"usuarios_admin\" && status = \"pendente\""
       },
       "fields": [
         {

@@ -1,20 +1,14 @@
 // Rota: POST /api/cadastro/{token}/aceitar
 // Público, multipart form.
-// Recebe: nome_exibicao, data_admissao, foto (obrigatória), aceite (bool/string 'true').
-// Salva os dados no registro do líder:
-// - nome_exibicao
-// - data_admissao
-// - foto
-// - status = "autorizado"
-// - termo_aceito = termo vigente id
-// Registra em consentimentos:
-// - lider: lider.id
-// - termo: termo vigente id
-// - versao_termo: versao do termo
-// - acao: "aceite"
-// - origem: "portal"
-// - registrado_por: "titular"
-// Só aceita se status for "convidado" e convite não expirado.
+// Recebe: nome_exibicao, data_admissao, foto (obrigatória), aceite (bool/string 'true'), termo_id (id do termo lido).
+//
+// 1. TRANSAÇÕES:
+// - A atualização do líder e a criação do registro em consentimentos devem acontecer dentro de UMA transação ($app.runInTransaction).
+// - Se qualquer uma das gravações falhar, nada é salvo e a rota devolve erro. Sem try/catch ignorando erro de consentimento.
+//
+// 3. TERMO LIDO = TERMO ACEITO:
+// - cadastro_aceitar compara o id recebido com o termo vigente no momento do aceite.
+// - Se forem diferentes, recusar com a mensagem exata: "O termo foi atualizado. Recarregue a página e leia a nova versão."
 routerAdd('POST', '/backend/v1/cadastro/{token}/aceitar', (e) => {
   const token = e.requestInfo().pathParams.token
   if (!token || token.length < 10) {
@@ -67,6 +61,14 @@ routerAdd('POST', '/backend/v1/cadastro/{token}/aceitar', (e) => {
   const reqInfo = e.requestInfo()
   const body = reqInfo.body || {}
 
+  // Conferência do termo lido: termo_id enviado pelo cliente vs termo vigente
+  const termoIdEnviado = (body.termo_id || '').toString().trim()
+  if (!termoIdEnviado || termoIdEnviado !== termoVigente.id) {
+    return e.json(400, {
+      message: 'O termo foi atualizado. Recarregue a página e leia a nova versão.',
+    })
+  }
+
   const nomeExibicao = (body.nome_exibicao || '').toString().trim()
   const dataAdmissao = (body.data_admissao || '').toString().trim()
   const aceite =
@@ -102,31 +104,37 @@ routerAdd('POST', '/backend/v1/cadastro/{token}/aceitar', (e) => {
 
   const fotoFile = uploadedFiles[0]
 
-  if (nomeExibicao) {
-    lider.set('nome_exibicao', nomeExibicao)
-  }
-  if (dataAdmissao) {
-    lider.set('data_admissao', dataAdmissao)
-  }
-
-  lider.set('foto', fotoFile)
-  lider.set('status', 'autorizado')
-  lider.set('termo_aceito', termoVigente.id)
-  $app.save(lider)
-
-  // Criar registro de consentimento
   try {
-    const consentimentosCol = $app.findCollectionByNameOrId('consentimentos')
-    const consRecord = new Record(consentimentosCol)
-    consRecord.set('lider', lider.id)
-    consRecord.set('termo', termoVigente.id)
-    consRecord.set('versao_termo', termoVigente.getInt('versao'))
-    consRecord.set('acao', 'aceite')
-    consRecord.set('origem', 'portal')
-    consRecord.set('registrado_por', 'titular')
-    $app.save(consRecord)
+    $app.runInTransaction((txApp) => {
+      // 1. Atualizar líder dentro da transação
+      const txLider = txApp.findFirstRecordByData('lideres', 'id', lider.id)
+      if (nomeExibicao) {
+        txLider.set('nome_exibicao', nomeExibicao)
+      }
+      if (dataAdmissao) {
+        txLider.set('data_admissao', dataAdmissao)
+      }
+      txLider.set('foto', fotoFile)
+      txLider.set('status', 'autorizado')
+      txLider.set('termo_aceito', termoVigente.id)
+      txApp.save(txLider)
+
+      // 2. Criar registro de consentimento dentro da transação
+      const consentimentosCol = txApp.findCollectionByNameOrId('consentimentos')
+      const consRecord = new Record(consentimentosCol)
+      consRecord.set('lider', txLider.id)
+      consRecord.set('termo', termoVigente.id)
+      consRecord.set('versao_termo', termoVigente.getInt('versao'))
+      consRecord.set('acao', 'aceite')
+      consRecord.set('origem', 'portal')
+      consRecord.set('registrado_por', 'titular')
+      txApp.save(consRecord)
+    })
   } catch (err) {
-    console.log('Erro ao salvar consentimento de aceite:', err)
+    console.log('Erro na transação de aceite:', err)
+    return e.json(500, {
+      message: 'Erro ao processar a autorização. Por favor, tente novamente.',
+    })
   }
 
   return e.json(200, {
