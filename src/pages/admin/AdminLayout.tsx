@@ -12,6 +12,7 @@ import {
   ExternalLink,
   Shield,
   MousePointerClick,
+  Sliders,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
@@ -74,10 +75,15 @@ export const AdminLayout: React.FC = () => {
     return <Navigate to="/admin/login" state={{ from: location }} replace />
   }
 
-  const navItems = [
+  const isAdmin = usuario?.papel === 'admin'
+
+  const navItems: Array<{ label: string; path: string; icon: React.ElementType }> = [
     { label: 'Início', path: '/admin', icon: LayoutDashboard },
     { label: 'Textos do Site', path: '/admin/site', icon: Globe },
     { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
+    ...(isAdmin
+      ? [{ label: 'Marca & Configurações', path: '/admin/configuracoes', icon: Sliders }]
+      : []),
     { label: 'Histórico de Alterações', path: '/admin/historico', icon: History },
   ]
 

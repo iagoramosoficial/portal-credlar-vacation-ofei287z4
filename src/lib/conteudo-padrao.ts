@@ -13,6 +13,30 @@ export interface ConfiguracoesSite {
   aviso_link?: string
   aviso_inicio?: string
   aviso_fim?: string
+  // Novos campos Etapa 1C
+  logo_principal?: string
+  logo_secundario?: string
+  titulo_pagina?: string
+  fuso_horario?: string
+  cor_primaria?: string
+  cor_secundaria?: string
+  cor_destaque?: string
+  cor_lilas?: string
+  cor_dourado?: string
+  cor_fundo_escuro?: string
+  cor_fundo_gradiente?: string
+  cor_fundo_claro?: string
+}
+
+export const CORES_PADRAO_HEX = {
+  cor_primaria: '#CC1F1F',
+  cor_secundaria: '#E85C1A',
+  cor_destaque: '#F5A623',
+  cor_lilas: '#9B5FC0',
+  cor_dourado: '#FFD700',
+  cor_fundo_escuro: '#0A0A0A',
+  cor_fundo_gradiente: '#8B0000',
+  cor_fundo_claro: '#FAFAFA',
 }
 
 export interface CardHome {
@@ -44,6 +68,11 @@ export const CONFIGURACOES_PADRAO: ConfiguracoesSite = {
   aviso_link: '',
   aviso_inicio: '',
   aviso_fim: '',
+  logo_principal: '',
+  logo_secundario: '',
+  titulo_pagina: 'Credlar Vacation',
+  fuso_horario: 'America/Sao_Paulo',
+  ...CORES_PADRAO_HEX,
 }
 
 export const CARDS_PADRAO: CardHome[] = [

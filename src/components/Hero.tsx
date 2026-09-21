@@ -1,6 +1,7 @@
 import { Reveal } from '@/components/Reveal'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 import unicredlarLogo from '@/assets/unicredlar-branco-ec4dd.png'
+import { pb } from '@/lib/pocketbase'
 
 import { ConfiguracoesSite, CONFIGURACOES_PADRAO } from '@/lib/conteudo-padrao'
 
@@ -14,6 +15,17 @@ export function Hero({ config = CONFIGURACOES_PADRAO }: HeroProps) {
   const frase = config.hero_frase || CONFIGURACOES_PADRAO.hero_frase
   const nomeEmpresa = config.nome_empresa || CONFIGURACOES_PADRAO.nome_empresa
 
+  // Obter URLs das logos salvas ou usar as imagens padrão do projeto como fallback
+  let logoPrincipalSrc = credlarLogo
+  if (config.id && config.logo_principal) {
+    logoPrincipalSrc = pb.files.getURL(config, config.logo_principal)
+  }
+
+  let logoSecundarioSrc = unicredlarLogo
+  if (config.id && config.logo_secundario) {
+    logoSecundarioSrc = pb.files.getURL(config, config.logo_secundario)
+  }
+
   return (
     <section className="relative min-h-[90vh] flex flex-col justify-center items-center bg-gradient-to-b from-brand-dark to-brand-darker overflow-hidden pt-20 pb-32">
       {/* Background textures */}
@@ -26,7 +38,7 @@ export function Hero({ config = CONFIGURACOES_PADRAO }: HeroProps) {
         >
           <div className="flex flex-col items-center justify-center w-48 h-24 sm:w-64 sm:h-32">
             <img
-              src={credlarLogo}
+              src={logoPrincipalSrc}
               alt={nomeEmpresa}
               className="w-full h-full object-contain drop-shadow-lg"
             />
@@ -36,8 +48,8 @@ export function Hero({ config = CONFIGURACOES_PADRAO }: HeroProps) {
 
           <div className="flex flex-col items-center justify-center w-48 h-24 sm:w-64 sm:h-32">
             <img
-              src={unicredlarLogo}
-              alt="UniCredlar"
+              src={logoSecundarioSrc}
+              alt="Logo secundário"
               className="w-full h-full object-contain drop-shadow-lg"
             />
           </div>

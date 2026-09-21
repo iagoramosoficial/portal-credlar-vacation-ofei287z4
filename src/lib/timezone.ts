@@ -2,10 +2,25 @@
  * Configuração de Fuso Horário do Projeto.
  *
  * DEFINIDO EM UM ÚNICO LUGAR:
- * Numa etapa futura, este valor passará a ser configurável por cliente.
+ * Centralizado e configurável pelo banco (configuracoes_site.fuso_horario).
+ * Fallback permanente: 'America/Sao_Paulo'.
  */
-export const APP_TIMEZONE = 'America/Sao_Paulo'
+export let APP_TIMEZONE = 'America/Sao_Paulo'
 export const APP_LOCALE = 'pt-BR'
+
+export function setAppTimezone(novoFuso: string | undefined | null) {
+  if (novoFuso && novoFuso.trim()) {
+    try {
+      // Testar se é um timezone válido
+      Intl.DateTimeFormat(undefined, { timeZone: novoFuso.trim() })
+      APP_TIMEZONE = novoFuso.trim()
+    } catch {
+      APP_TIMEZONE = 'America/Sao_Paulo'
+    }
+  } else {
+    APP_TIMEZONE = 'America/Sao_Paulo'
+  }
+}
 
 /**
  * Formata uma data UTC vinda do banco ou timestamp ISO para exibição no fuso horário da aplicação.

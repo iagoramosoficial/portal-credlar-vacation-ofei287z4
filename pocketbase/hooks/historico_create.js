@@ -1,4 +1,4 @@
-// Hook de Criação (configuracoes_site e cards_home)
+// Hook de Criação (configuracoes_site, cards_home, parametros, termos)
 // Intercepta a requisição HTTP para capturar e.auth e registrar auditoria com o e-mail do autor
 onRecordCreateRequest(
   (e) => {
@@ -41,4 +41,6 @@ onRecordCreateRequest(
   },
   'configuracoes_site',
   'cards_home',
+  'parametros',
+  'termos',
 )

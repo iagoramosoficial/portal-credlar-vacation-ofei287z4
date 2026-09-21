@@ -1,4 +1,4 @@
-// Hook de Atualização (configuracoes_site e cards_home)
+// Hook de Atualização (configuracoes_site, cards_home, parametros, termos)
 // Intercepta a requisição HTTP para capturar e.auth e registrar auditoria com o e-mail do autor
 onRecordUpdateRequest(
   (e) => {
@@ -48,4 +48,6 @@ onRecordUpdateRequest(
   },
   'configuracoes_site',
   'cards_home',
+  'parametros',
+  'termos',
 )

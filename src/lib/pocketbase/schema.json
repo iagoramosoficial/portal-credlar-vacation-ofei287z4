@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T21:58:43.533Z",
+  "generatedAt": "2026-09-21T22:14:30.749Z",
   "collections": [
     {
       "name": "users",
@@ -146,6 +146,78 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "logo_principal",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "logo_secundario",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "titulo_pagina",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "fuso_horario",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_primaria",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_secundaria",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_destaque",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_lilas",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_dourado",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_fundo_escuro",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_fundo_gradiente",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "cor_fundo_claro",
+          "type": "text",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -389,6 +461,126 @@
       "indexes": [
         "CREATE UNIQUE INDEX `idx_tokenKey_pbc_1492831541` ON `usuarios_admin` (`tokenKey`)",
         "CREATE UNIQUE INDEX `idx_email_pbc_1492831541` ON `usuarios_admin` (`email`) WHERE `email` != ''"
+      ]
+    },
+    {
+      "name": "parametros",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "create": null,
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "dias_alerta_sugestao",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "dias_pesquisa_aberta",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "dias_validade_homenagem",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "email_remetente_nome",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "email_remetente",
+          "type": "email",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "termos",
+      "type": "base",
+      "apiRules": {
+        "list": "vigente = true || (@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\")",
+        "view": "vigente = true || (@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\")",
+        "create": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\" && @request.body.tipo:isset = false && @request.body.versao:isset = false && @request.body.titulo:isset = false && @request.body.conteudo:isset = false",
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "tipo",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["uso_imagem", "privacidade"]
+        },
+        {
+          "name": "versao",
+          "type": "number",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "titulo",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "conteudo",
+          "type": "editor",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "vigente",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_termos_tipo_versao ON termos (tipo, versao DESC)",
+        "CREATE INDEX idx_termos_vigente ON termos (tipo, vigente)"
       ]
     }
   ]

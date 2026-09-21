@@ -1,4 +1,4 @@
-// Hook de Exclusão (configuracoes_site e cards_home)
+// Hook de Exclusão (configuracoes_site, cards_home, parametros, termos)
 // Intercepta a requisição HTTP para capturar e.auth e registrar auditoria com o e-mail do autor
 onRecordDeleteRequest(
   (e) => {
@@ -42,4 +42,6 @@ onRecordDeleteRequest(
   },
   'configuracoes_site',
   'cards_home',
+  'parametros',
+  'termos',
 )

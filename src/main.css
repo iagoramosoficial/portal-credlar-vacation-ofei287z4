@@ -8,6 +8,16 @@
 
 @layer base {
   :root {
+    /* Cores da marca configuráveis (formato R G B sem vírgulas para opacidade do Tailwind) */
+    --brand-red: 204 31 31; /* #CC1F1F */
+    --brand-orange: 232 92 26; /* #E85C1A */
+    --brand-yellow: 245 166 35; /* #F5A623 */
+    --brand-lilac: 155 95 192; /* #9B5FC0 */
+    --brand-gold: 255 215 0; /* #FFD700 */
+    --brand-dark: 10 10 10; /* #0A0A0A */
+    --brand-darker: 139 0 0; /* #8B0000 */
+    --brand-light: 250 250 250; /* #FAFAFA */
+
     --background: 0 0% 98%; /* FAFAFA */
     --foreground: 0 0% 3.9%; /* 0A0A0A */
 

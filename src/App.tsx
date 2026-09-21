@@ -13,6 +13,8 @@ import { AdminHomePage } from '@/pages/admin/AdminHomePage'
 import { AdminSitePage } from '@/pages/admin/AdminSitePage'
 import { AdminCardsPage } from '@/pages/admin/AdminCardsPage'
 import { AdminHistoricoPage } from '@/pages/admin/AdminHistoricoPage'
+import { AdminConfiguracoesPage } from '@/pages/admin/AdminConfiguracoesPage'
+import PrivacidadePage from './pages/PrivacidadePage'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -27,6 +29,7 @@ const App = () => (
           {/* Rotas Públicas */}
           <Route element={<Layout />}>
             <Route path="/" element={<Index />} />
+            <Route path="/privacidade" element={<PrivacidadePage />} />
           </Route>
 
           {/* Rota Pública do Login Admin */}
@@ -38,6 +41,7 @@ const App = () => (
             <Route path="site" element={<AdminSitePage />} />
             <Route path="cards" element={<AdminCardsPage />} />
             <Route path="historico" element={<AdminHistoricoPage />} />
+            <Route path="configuracoes" element={<AdminConfiguracoesPage />} />
           </Route>
 
           <Route path="*" element={<NotFound />} />

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Reveal } from '@/components/Reveal'
 import xdreamsLogo from '@/assets/xdreams-advisory-fundo-preto-30871.png'
 
@@ -41,11 +42,19 @@ export function Footer({ config = CONFIGURACOES_PADRAO }: FooterProps) {
         </Reveal>
 
         <Reveal delay={200}>
-          <p className="text-white/60 text-xs md:text-sm max-w-md mx-auto mb-16 uppercase tracking-widest leading-relaxed">
+          <p className="text-white/60 text-xs md:text-sm max-w-md mx-auto mb-6 uppercase tracking-widest leading-relaxed">
             {parceria}
             <br />
             <span className="opacity-80 font-bold">{metodologia}</span>
           </p>
+          <div className="mb-14">
+            <Link
+              to="/privacidade"
+              className="text-xs text-white/40 hover:text-white/80 transition-colors underline-offset-4 hover:underline"
+            >
+              Privacidade
+            </Link>
+          </div>
         </Reveal>
 
         <Reveal delay={300} className="w-full">

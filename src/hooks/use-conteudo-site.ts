@@ -6,6 +6,8 @@ import {
   CONFIGURACOES_PADRAO,
   CARDS_PADRAO,
 } from '@/lib/conteudo-padrao'
+import { aplicarCoresCss } from '@/lib/theme'
+import { setAppTimezone } from '@/lib/timezone'
 
 export function useConteudoSite() {
   const [config, setConfig] = useState<ConfiguracoesSite>(CONFIGURACOES_PADRAO)
@@ -29,10 +31,30 @@ export function useConteudoSite() {
         if (!isMounted) return
 
         if (configRes.status === 'fulfilled' && configRes.value) {
+          const dadosConfig = configRes.value
           setConfig((prev) => ({
             ...prev,
-            ...configRes.value,
+            ...dadosConfig,
           }))
+
+          // Aplicar cores dinâmicas
+          aplicarCoresCss(dadosConfig)
+
+          // Atualizar fuso horário centralizado
+          if (dadosConfig.fuso_horario) {
+            setAppTimezone(dadosConfig.fuso_horario)
+          }
+
+          // Atualizar título da aba do navegador
+          if (dadosConfig.titulo_pagina) {
+            document.title = dadosConfig.titulo_pagina
+          }
+        } else {
+          // Fallback para valores padrão
+          aplicarCoresCss(CONFIGURACOES_PADRAO)
+          if (CONFIGURACOES_PADRAO.titulo_pagina) {
+            document.title = CONFIGURACOES_PADRAO.titulo_pagina
+          }
         }
 
         if (cardsRes.status === 'fulfilled' && cardsRes.value && cardsRes.value.length > 0) {
