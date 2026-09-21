@@ -14,7 +14,9 @@ import { AdminSitePage } from '@/pages/admin/AdminSitePage'
 import { AdminCardsPage } from '@/pages/admin/AdminCardsPage'
 import { AdminHistoricoPage } from '@/pages/admin/AdminHistoricoPage'
 import { AdminConfiguracoesPage } from '@/pages/admin/AdminConfiguracoesPage'
+import { AdminLideresPage } from '@/pages/admin/AdminLideresPage'
 import PrivacidadePage from './pages/PrivacidadePage'
+import CadastroLiderPage from './pages/CadastroLiderPage'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -32,12 +34,16 @@ const App = () => (
             <Route path="/privacidade" element={<PrivacidadePage />} />
           </Route>
 
+          {/* Rota Pública de Cadastro e Autorização de Imagem */}
+          <Route path="/cadastro/:token" element={<CadastroLiderPage />} />
+
           {/* Rota Pública do Login Admin */}
           <Route path="/admin/login" element={<AdminLoginPage />} />
 
           {/* Rotas Protegidas do Painel /admin */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminHomePage />} />
+            <Route path="lideres" element={<AdminLideresPage />} />
             <Route path="site" element={<AdminSitePage />} />
             <Route path="cards" element={<AdminCardsPage />} />
             <Route path="historico" element={<AdminHistoricoPage />} />

@@ -1,4 +1,4 @@
-// Hook de Criação (configuracoes_site, cards_home, parametros, termos)
+// Hook de Criação (configuracoes_site, cards_home, parametros, termos, lideres)
 // Intercepta a requisição HTTP para capturar e.auth e registrar auditoria com o e-mail do autor
 onRecordCreateRequest(
   (e) => {
@@ -25,6 +25,9 @@ onRecordCreateRequest(
       let depois = null
       try {
         depois = e.record.publicExport ? e.record.publicExport() : null
+        if (depois && typeof depois === 'object' && 'token_convite' in depois) {
+          delete depois.token_convite
+        }
       } catch (_) {}
 
       const historicoCol = $app.findCollectionByNameOrId('historico')
@@ -43,4 +46,5 @@ onRecordCreateRequest(
   'cards_home',
   'parametros',
   'termos',
+  'lideres',
 )

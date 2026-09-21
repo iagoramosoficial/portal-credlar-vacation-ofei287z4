@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-21T22:14:30.749Z",
+  "generatedAt": "2026-09-21T23:10:46.391Z",
   "collections": [
     {
       "name": "users",
@@ -215,6 +215,12 @@
         },
         {
           "name": "cor_fundo_claro",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "mensagem_convite",
           "type": "text",
           "required": false,
           "system": false
@@ -517,6 +523,12 @@
           "required": false,
           "system": false,
           "autodateTriggers": ["onCreate", "onUpdate"]
+        },
+        {
+          "name": "dias_validade_convite",
+          "type": "number",
+          "required": false,
+          "system": false
         }
       ],
       "indexes": []
@@ -579,9 +591,158 @@
         }
       ],
       "indexes": [
-        "CREATE INDEX idx_termos_tipo_versao ON termos (tipo, versao DESC)",
-        "CREATE INDEX idx_termos_vigente ON termos (tipo, vigente)"
+        "CREATE INDEX idx_termos_vigente ON termos (tipo, vigente)",
+        "CREATE UNIQUE INDEX `idx_termos_tipo_versao_unique` ON `termos` (tipo, versao)"
       ]
+    },
+    {
+      "name": "lideres",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
+        "create": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.body.status:isset = false && @request.body.token_convite:isset = false && @request.body.convite_expira_em:isset = false && @request.body.termo_aceito:isset = false",
+        "delete": "@request.auth.collectionName = \"usuarios_admin\""
+      },
+      "fields": [
+        {
+          "name": "nome",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "nome_exibicao",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "area",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "data_admissao",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "foto",
+          "type": "file",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": false,
+          "system": false,
+          "selectValues": ["pendente", "convidado", "autorizado", "recusado", "revogado"]
+        },
+        {
+          "name": "convite_expira_em",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "termo_aceito",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "termos"
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE UNIQUE INDEX idx_lideres_token_convite ON lideres (token_convite) WHERE token_convite IS NOT NULL AND token_convite != \"\"",
+        "CREATE INDEX idx_lideres_status ON lideres (status)"
+      ]
+    },
+    {
+      "name": "consentimentos",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
+        "create": null,
+        "update": null,
+        "delete": null
+      },
+      "fields": [
+        {
+          "name": "lider",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "lideres"
+        },
+        {
+          "name": "termo",
+          "type": "relation",
+          "required": false,
+          "system": false,
+          "collectionRef": "termos"
+        },
+        {
+          "name": "versao_termo",
+          "type": "number",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "acao",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["aceite", "recusa", "revogacao"]
+        },
+        {
+          "name": "origem",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["portal", "painel"]
+        },
+        {
+          "name": "registrado_por",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": ["CREATE INDEX idx_consentimentos_lider ON consentimentos (lider, created DESC)"]
     }
   ]
 }

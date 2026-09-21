@@ -18,8 +18,40 @@ export interface ParametrosApp {
   dias_alerta_sugestao: number
   dias_pesquisa_aberta: number
   dias_validade_homenagem: number
+  dias_validade_convite?: number
   email_remetente_nome?: string
   email_remetente?: string
+  created: string
+  updated: string
+}
+
+export type LiderStatus = 'pendente' | 'convidado' | 'autorizado' | 'recusado' | 'revogado'
+
+export interface LiderItem {
+  id: string
+  nome: string
+  nome_exibicao?: string
+  area?: string
+  data_admissao?: string
+  foto?: string
+  status: LiderStatus
+  convite_expira_em?: string
+  termo_aceito?: string
+  created: string
+  updated: string
+}
+
+export type ConsentimentoAcao = 'aceite' | 'recusa' | 'revogacao'
+export type ConsentimentoOrigem = 'portal' | 'painel'
+
+export interface ConsentimentoItem {
+  id: string
+  lider: string
+  termo?: string
+  versao_termo?: number
+  acao: ConsentimentoAcao
+  origem: ConsentimentoOrigem
+  registrado_por: string
   created: string
   updated: string
 }
@@ -145,5 +177,64 @@ export const adminService = {
   async setTermoVigente(id: string): Promise<TermoItem> {
     const updated = await pb.collection('termos').update<TermoItem>(id, { vigente: true })
     return updated
+  },
+
+  // Líderes
+  async getLideres(): Promise<LiderItem[]> {
+    const list = await pb.collection('lideres').getFullList<LiderItem>({
+      sort: '-created',
+    })
+    return list
+  },
+
+  async createLider(data: { nome: string; area?: string }): Promise<LiderItem> {
+    const created = await pb.collection('lideres').create<LiderItem>(data)
+    return created
+  },
+
+  async updateLider(id: string, data: { nome?: string; area?: string }): Promise<LiderItem> {
+    const updated = await pb.collection('lideres').update<LiderItem>(id, data)
+    return updated
+  },
+
+  async deleteLider(id: string): Promise<boolean> {
+    await pb.collection('lideres').delete(id)
+    return true
+  },
+
+  async gerarConviteLider(id: string): Promise<{
+    link: string
+    token: string
+    expira_em: string
+    dias_validade: number
+  }> {
+    const res = await pb.send<{
+      link: string
+      token: string
+      expira_em: string
+      dias_validade: number
+    }>(`/backend/v1/lideres/${id}/convite`, {
+      method: 'POST',
+    })
+    return res
+  },
+
+  async revogarLiderPeloPainel(id: string): Promise<{ status: string; message: string }> {
+    const res = await pb.send<{ status: string; message: string }>(
+      `/backend/v1/lideres/${id}/revogar`,
+      {
+        method: 'POST',
+      },
+    )
+    return res
+  },
+
+  // Consentimentos
+  async getConsentimentosLider(liderId: string): Promise<ConsentimentoItem[]> {
+    const list = await pb.collection('consentimentos').getFullList<ConsentimentoItem>({
+      filter: `lider = "${liderId}"`,
+      sort: '-created',
+    })
+    return list
   },
 }

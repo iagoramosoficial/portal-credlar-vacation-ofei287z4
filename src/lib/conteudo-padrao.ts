@@ -26,6 +26,8 @@ export interface ConfiguracoesSite {
   cor_fundo_escuro?: string
   cor_fundo_gradiente?: string
   cor_fundo_claro?: string
+  // Etapa 1D
+  mensagem_convite?: string
 }
 
 export const CORES_PADRAO_HEX = {
@@ -72,6 +74,8 @@ export const CONFIGURACOES_PADRAO: ConfiguracoesSite = {
   logo_secundario: '',
   titulo_pagina: 'Credlar Vacation',
   fuso_horario: 'America/Sao_Paulo',
+  mensagem_convite:
+    'Olá, {nome}! Você foi convidado(a) para o Hall da Fama da UniCredlar. Para completar seu cadastro e autorizar o uso da sua foto, acesse: {link} (válido até {validade}).',
   ...CORES_PADRAO_HEX,
 }
 

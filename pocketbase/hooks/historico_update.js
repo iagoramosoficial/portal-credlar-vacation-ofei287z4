@@ -6,6 +6,9 @@ onRecordUpdateRequest(
     try {
       const orig = e.record.original()
       antes = orig && orig.publicExport ? orig.publicExport() : null
+      if (antes && typeof antes === 'object' && 'token_convite' in antes) {
+        delete antes.token_convite
+      }
     } catch (_) {}
 
     // Executa a atualização do registro
@@ -31,6 +34,9 @@ onRecordUpdateRequest(
       let depois = null
       try {
         depois = e.record.publicExport ? e.record.publicExport() : null
+        if (depois && typeof depois === 'object' && 'token_convite' in depois) {
+          delete depois.token_convite
+        }
       } catch (_) {}
 
       const historicoCol = $app.findCollectionByNameOrId('historico')
@@ -50,4 +56,5 @@ onRecordUpdateRequest(
   'cards_home',
   'parametros',
   'termos',
+  'lideres',
 )

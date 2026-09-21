@@ -1,0 +1,62 @@
+// Rota: POST /api/cadastro/{token}/recusar
+// Público. Status "recusado" e registro em consentimentos (acao recusa, origem portal, registrado_por "titular").
+routerAdd('POST', '/backend/v1/cadastro/{token}/recusar', (e) => {
+  const token = e.requestInfo().pathParams.token
+  if (!token || token.length < 10) {
+    return e.json(404, { message: 'Convite inválido ou expirado.' })
+  }
+
+  let lider
+  try {
+    lider = $app.findFirstRecordByData('lideres', 'token_convite', token)
+  } catch (_) {
+    return e.json(404, { message: 'Convite inválido ou expirado.' })
+  }
+
+  if (!lider) {
+    return e.json(404, { message: 'Convite inválido ou expirado.' })
+  }
+
+  const currentStatus = lider.getString('status')
+  if (currentStatus === 'autorizado') {
+    return e.json(400, { message: 'Cadastro já autorizado. Utilize a opção de revogação.' })
+  }
+
+  let termoVigente = null
+  try {
+    const termos = $app.findRecordsByFilter(
+      'termos',
+      "tipo = 'uso_imagem' && vigente = true",
+      '',
+      1,
+      0,
+    )
+    if (termos && termos.length > 0) {
+      termoVigente = termos[0]
+    }
+  } catch (_) {}
+
+  lider.set('status', 'recusado')
+  $app.save(lider)
+
+  try {
+    const consentimentosCol = $app.findCollectionByNameOrId('consentimentos')
+    const consRecord = new Record(consentimentosCol)
+    consRecord.set('lider', lider.id)
+    if (termoVigente) {
+      consRecord.set('termo', termoVigente.id)
+      consRecord.set('versao_termo', termoVigente.getInt('versao'))
+    }
+    consRecord.set('acao', 'recusa')
+    consRecord.set('origem', 'portal')
+    consRecord.set('registrado_por', 'titular')
+    $app.save(consRecord)
+  } catch (err) {
+    console.log('Erro ao salvar consentimento de recusa:', err)
+  }
+
+  return e.json(200, {
+    status: 'recusado',
+    message: 'Convite recusado com sucesso.',
+  })
+})

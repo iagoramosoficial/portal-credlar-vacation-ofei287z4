@@ -5,6 +5,9 @@ onRecordDeleteRequest(
     let antes = null
     try {
       antes = e.record.publicExport ? e.record.publicExport() : null
+      if (antes && typeof antes === 'object' && 'token_convite' in antes) {
+        delete antes.token_convite
+      }
     } catch (_) {}
 
     const collectionName = e.record.collection().name
@@ -44,4 +47,5 @@ onRecordDeleteRequest(
   'cards_home',
   'parametros',
   'termos',
+  'lideres',
 )

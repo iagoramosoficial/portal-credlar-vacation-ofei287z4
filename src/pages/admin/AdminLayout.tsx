@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   Globe,
   Layers,
+  Users,
   History,
   LogOut,
   Menu,
@@ -79,6 +80,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems: Array<{ label: string; path: string; icon: React.ElementType }> = [
     { label: 'Início', path: '/admin', icon: LayoutDashboard },
+    { label: 'Líderes', path: '/admin/lideres', icon: Users },
     { label: 'Textos do Site', path: '/admin/site', icon: Globe },
     { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
     ...(isAdmin
