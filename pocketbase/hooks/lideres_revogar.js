@@ -19,7 +19,7 @@ routerAdd(
       })
     }
 
-    const liderId = e.requestInfo().pathParams.id
+    const liderId = e.request.pathValue('id')
     if (!liderId) {
       return e.json(400, { message: 'ID do líder é obrigatório.' })
     }

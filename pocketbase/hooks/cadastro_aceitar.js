@@ -10,7 +10,7 @@
 // - cadastro_aceitar compara o id recebido com o termo vigente no momento do aceite.
 // - Se forem diferentes, recusar com a mensagem exata: "O termo foi atualizado. Recarregue a página e leia a nova versão."
 routerAdd('POST', '/backend/v1/cadastro/{token}/aceitar', (e) => {
-  const token = e.requestInfo().pathParams.token
+  const token = e.request.pathValue('token')
   if (!token || token.length < 10) {
     return e.json(404, { message: 'Convite inválido ou expirado.' })
   }

@@ -25,7 +25,7 @@ routerAdd(
       return e.json(403, { message: 'Apenas administradores podem gerar convites.' })
     }
 
-    const liderId = e.requestInfo().pathParams.id
+    const liderId = e.request.pathValue('id')
     if (!liderId) {
       return e.json(400, { message: 'ID do líder é obrigatório.' })
     }

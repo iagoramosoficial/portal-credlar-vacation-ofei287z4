@@ -3,7 +3,7 @@
 // A atualização do líder e o registro em consentimentos devem acontecer dentro de UMA transação ($app.runInTransaction).
 // Se qualquer uma das gravações falhar, nada é salvo e a rota devolve erro.
 routerAdd('POST', '/backend/v1/cadastro/{token}/recusar', (e) => {
-  const token = e.requestInfo().pathParams.token
+  const token = e.request.pathValue('token')
   if (!token || token.length < 10) {
     return e.json(404, { message: 'Convite inválido ou expirado.' })
   }

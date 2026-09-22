@@ -2,7 +2,7 @@
 // Público. Devolve APENAS: nome_exibicao (ou nome), status, data de validade e o termo uso_imagem vigente (id, título, versão, conteúdo).
 // Token inválido ou expirado: mensagem genérica, sem revelar se o token existe.
 routerAdd('GET', '/backend/v1/cadastro/{token}', (e) => {
-  const token = e.requestInfo().pathParams.token
+  const token = e.request.pathValue('token')
   if (!token || token.length < 10) {
     return e.json(404, { message: 'Convite inválido ou expirado.' })
   }
