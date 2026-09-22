@@ -104,10 +104,17 @@ routerAdd(
     const expiraEmIso = expiraEmDate.toISOString()
 
     // Atualizar registro do líder
-    liderRecord.set('token_convite', token)
-    liderRecord.set('convite_expira_em', expiraEmIso)
-    liderRecord.set('status', 'convidado')
-    $app.save(liderRecord)
+    try {
+      liderRecord.set('token_convite', token)
+      liderRecord.set('convite_expira_em', expiraEmIso)
+      liderRecord.set('status', 'convidado')
+      $app.save(liderRecord)
+    } catch (saveErr) {
+      console.log('Erro ao salvar líder com convite:', saveErr)
+      return e.json(500, {
+        message: 'Erro interno ao salvar convite do líder.',
+      })
+    }
 
     return e.json(200, {
       link: '/cadastro/' + token,
