@@ -38,6 +38,83 @@ export const AdminLayout: React.FC = () => {
   const [cliquesList, setCliquesList] = useState<CliqueItem[]>([])
   const { toast } = useToast()
 
+  // Detectar formulários com alterações não salvas no painel (/admin/*)
+  useEffect(() => {
+    const verificarAlteracoesAdmin = () => {
+      // Procura qualquer form ativo no painel
+      const forms = document.querySelectorAll('main form, [role="dialog"] form')
+      let temAlteracao = false
+
+      forms.forEach((form) => {
+        // Ignora formulários de busca rápida simples
+        const inputs = form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+          'input:not([type="hidden"]):not([type="submit"]):not([type="button"]):not([type="search"]), textarea',
+        )
+
+        inputs.forEach((input) => {
+          if (temAlteracao) return
+
+          // Ignora inputs de busca se existirem
+          if (input.id === 'busca' || input.placeholder.toLowerCase().includes('buscar')) {
+            return
+          }
+
+          if (
+            input instanceof HTMLInputElement &&
+            (input.type === 'checkbox' || input.type === 'radio')
+          ) {
+            if (input.checked !== input.defaultChecked) {
+              temAlteracao = true
+            }
+          } else if (input instanceof HTMLInputElement && input.type === 'file') {
+            if (input.files && input.files.length > 0) {
+              temAlteracao = true
+            }
+          } else {
+            // Comparar valor atual com defaultValue
+            if (input.value !== input.defaultValue && input.value.trim() !== '') {
+              temAlteracao = true
+            }
+          }
+        })
+      })
+
+      if (temAlteracao) {
+        document.body.setAttribute('data-form-dirty', 'true')
+      } else {
+        document.body.removeAttribute('data-form-dirty')
+      }
+      window.dispatchEvent(new CustomEvent('app:form-dirty', { detail: { dirty: temAlteracao } }))
+    }
+
+    // Monitorar inputs e mudanças de campos no DOM
+    const handleInputOrChange = () => {
+      verificarAlteracoesAdmin()
+    }
+
+    const mainEl = document.querySelector('main')
+    window.addEventListener('input', handleInputOrChange, true)
+    window.addEventListener('change', handleInputOrChange, true)
+    window.addEventListener('reset', () => setTimeout(verificarAlteracoesAdmin, 50), true)
+
+    // Observar inserções de modais / formulários
+    const observer = new MutationObserver(() => {
+      verificarAlteracoesAdmin()
+    })
+    if (mainEl) {
+      observer.observe(mainEl, { childList: true, subtree: true })
+    }
+    observer.observe(document.body, { childList: true, subtree: false })
+
+    return () => {
+      window.removeEventListener('input', handleInputOrChange, true)
+      window.removeEventListener('change', handleInputOrChange, true)
+      observer.disconnect()
+      document.body.removeAttribute('data-form-dirty')
+      window.dispatchEvent(new CustomEvent('app:form-dirty', { detail: { dirty: false } }))
+    }
+  }, [location.pathname])
+
   // Garantir meta tag noindex em todas as páginas /admin
   useEffect(() => {
     let metaTag = document.querySelector('meta[name="robots"]')

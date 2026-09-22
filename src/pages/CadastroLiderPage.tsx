@@ -61,6 +61,9 @@ export const CadastroLiderPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [erroForm, setErroForm] = useState<string | null>(null)
 
+  // Referência do nome original vindo do backend para detectar alteração
+  const nomeOriginalRef = useRef<string>('')
+
   // Modais de confirmação
   const [modalRecusaOpen, setModalRecusaOpen] = useState(false)
   const [modalRevogacaoOpen, setModalRevogacaoOpen] = useState(false)
@@ -111,6 +114,7 @@ export const CadastroLiderPage: React.FC = () => {
         if (isMounted) {
           setDadosConvite(res)
           if (res.nome_exibicao) {
+            nomeOriginalRef.current = res.nome_exibicao
             setNomeExibicao(res.nome_exibicao)
           }
         }
@@ -136,6 +140,36 @@ export const CadastroLiderPage: React.FC = () => {
       isMounted = false
     }
   }, [token])
+
+  // Rastrear se o líder preencheu algum campo ou escolheu uma foto
+  useEffect(() => {
+    // Se a ação já foi concluída, limpa o estado
+    if (acaoConcluida) {
+      document.body.removeAttribute('data-form-dirty')
+      window.dispatchEvent(new CustomEvent('app:form-dirty', { detail: { dirty: false } }))
+      return
+    }
+
+    const fotoEscolhida = !!fotoArquivo
+    const dataPreenchida = !!dataAdmissao.trim()
+    const nomeModificado =
+      nomeExibicao.trim() !== nomeOriginalRef.current.trim() && nomeExibicao.trim() !== ''
+    const termoMarcado = concordouTermo
+
+    const temPreenchimento = fotoEscolhida || dataPreenchida || nomeModificado || termoMarcado
+
+    if (temPreenchimento) {
+      document.body.setAttribute('data-form-dirty', 'true')
+    } else {
+      document.body.removeAttribute('data-form-dirty')
+    }
+    window.dispatchEvent(new CustomEvent('app:form-dirty', { detail: { dirty: temPreenchimento } }))
+
+    return () => {
+      document.body.removeAttribute('data-form-dirty')
+      window.dispatchEvent(new CustomEvent('app:form-dirty', { detail: { dirty: false } }))
+    }
+  }, [fotoArquivo, dataAdmissao, nomeExibicao, concordouTermo, acaoConcluida])
 
   // Lidar com seleção de foto
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "start": "vite dev",
+    "predev": "node scripts/generate-version.mjs",
     "dev": "vite",
     "build": "vite build",
+    "prebuild": "node scripts/generate-version.mjs",
     "build:dev": "vite build --mode development",
     "lint": "oxlint src",
     "lint:fix": "oxlint src --fix",

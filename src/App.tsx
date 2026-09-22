@@ -7,6 +7,8 @@ import Index from './pages/Index'
 import NotFound from './pages/NotFound'
 import Layout from './components/Layout'
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext'
+import { VersionProvider } from '@/contexts/VersionContext'
+import { FaixaNovaVersao } from '@/components/FaixaNovaVersao'
 import { AdminLayout } from '@/pages/admin/AdminLayout'
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage'
 import { AdminHomePage } from '@/pages/admin/AdminHomePage'
@@ -25,33 +27,36 @@ const App = () => (
   <BrowserRouter>
     <TooltipProvider>
       <AdminAuthProvider>
-        <Toaster />
-        <Sonner />
-        <Routes>
-          {/* Rotas Públicas */}
-          <Route element={<Layout />}>
-            <Route path="/" element={<Index />} />
-            <Route path="/privacidade" element={<PrivacidadePage />} />
-          </Route>
+        <VersionProvider>
+          <Toaster />
+          <Sonner />
+          <FaixaNovaVersao />
+          <Routes>
+            {/* Rotas Públicas */}
+            <Route element={<Layout />}>
+              <Route path="/" element={<Index />} />
+              <Route path="/privacidade" element={<PrivacidadePage />} />
+            </Route>
 
-          {/* Rota Pública de Cadastro e Autorização de Imagem */}
-          <Route path="/cadastro/:token" element={<CadastroLiderPage />} />
+            {/* Rota Pública de Cadastro e Autorização de Imagem */}
+            <Route path="/cadastro/:token" element={<CadastroLiderPage />} />
 
-          {/* Rota Pública do Login Admin */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
+            {/* Rota Pública do Login Admin */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
 
-          {/* Rotas Protegidas do Painel /admin */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminHomePage />} />
-            <Route path="lideres" element={<AdminLideresPage />} />
-            <Route path="site" element={<AdminSitePage />} />
-            <Route path="cards" element={<AdminCardsPage />} />
-            <Route path="historico" element={<AdminHistoricoPage />} />
-            <Route path="configuracoes" element={<AdminConfiguracoesPage />} />
-          </Route>
+            {/* Rotas Protegidas do Painel /admin */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminHomePage />} />
+              <Route path="lideres" element={<AdminLideresPage />} />
+              <Route path="site" element={<AdminSitePage />} />
+              <Route path="cards" element={<AdminCardsPage />} />
+              <Route path="historico" element={<AdminHistoricoPage />} />
+              <Route path="configuracoes" element={<AdminConfiguracoesPage />} />
+            </Route>
 
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </VersionProvider>
       </AdminAuthProvider>
     </TooltipProvider>
   </BrowserRouter>
