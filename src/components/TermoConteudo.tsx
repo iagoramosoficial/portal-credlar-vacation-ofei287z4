@@ -21,16 +21,16 @@ interface TermoConteudoProps {
 }
 
 /**
- * Detecta se uma string contém marcações HTML estruturais de bloco ou formatação rica.
+ * Detecta se uma string contém qualquer tag HTML (mesmo simples ou mal formada).
  */
-function contemMarcacaoHtml(texto: string): boolean {
-  return /<\s*(p|div|ul|ol|li|h[1-6]|table|br|blockquote|section|article)\b[^>]*>/i.test(texto)
+export function contemMarcacaoHtml(texto: string): boolean {
+  return /<\s*[a-z][a-z0-9-]*\b[^>]*>/i.test(texto)
 }
 
 /**
  * Escapa caracteres HTML para uso seguro ao converter texto puro em HTML estruturado.
  */
-function escapeHtml(texto: string): string {
+export function escapeHtml(texto: string): string {
   return texto
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -40,33 +40,20 @@ function escapeHtml(texto: string): string {
 }
 
 /**
- * Converte texto puro em HTML estruturado:
+ * Converte quebras de linha de texto puro em parágrafos e quebras <br />:
  * - Quebras duplas (ou mais) => novo parágrafo <p>
  * - Quebras simples dentro do bloco => <br />
- * Se o texto já tiver marcações HTML estruturais (<p>, <ul>, etc.), retorna o texto original.
  */
-export function formatarConteudoTermoParaHtml(conteudoBruto: string | null | undefined): string {
-  if (!conteudoBruto) return ''
+export function converterTextoPuroParaParagrafos(textoPuro: string): string {
+  const normalizado = textoPuro.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+  if (!normalizado) return ''
 
-  const texto = conteudoBruto.trim()
-  if (!texto) return ''
-
-  // Se já tiver tags HTML de bloco/estrutura, preserva
-  if (contemMarcacaoHtml(texto)) {
-    return sanitizeHtml(texto)
-  }
-
-  // Normalizar quebras de linha CRLF -> LF
-  const normalizado = texto.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
-
-  // Dividir por duas ou mais quebras de linha (parágrafos)
   const blocos = normalizado.split(/\n{2,}/)
 
-  const paragrafosHtml = blocos
+  return blocos
     .map((bloco) => {
       const blocoTrim = bloco.trim()
       if (!blocoTrim) return ''
-      // Escapa caracteres especiais e converte quebra simples em <br />
       const linhas = blocoTrim
         .split('\n')
         .map((linha) => escapeHtml(linha.trim()))
@@ -75,8 +62,200 @@ export function formatarConteudoTermoParaHtml(conteudoBruto: string | null | und
     })
     .filter(Boolean)
     .join('\n')
+}
 
-  return sanitizeHtml(paragrafosHtml)
+/**
+ * Converte quebras de linha em nós de texto dentro de uma string com nós/marcações HTML.
+ * Suporta conteúdo MISTO (ex: texto corrido com quebras de linha + listas <ul>/<li> no meio),
+ * preservando a semântica das listas/tabelas/headings e envelopando texto solto em <p>.
+ */
+export function converterConteudoMistoParaHtml(conteudoHtml: string): string {
+  if (typeof window === 'undefined') {
+    // Ambiente sem DOMParser (SSR/Node básico): divide por tags de bloco estruturais
+    return conteudoHtml
+  }
+
+  // Se o conteúdo bruto possuir quebras após tags de fechamento de bloco (ex: </ul>\n\n ou </li>\n),
+  // DOMParser pode interpretar nós soltos entre tags ou colapsar.
+  const parser = new DOMParser()
+  const doc = parser.parseFromString(conteudoHtml, 'text/html')
+  const body = doc.body
+
+  // Tags de bloco reconhecidas onde nós soltos NÃO devem ser envelopados se já estiverem dentro delas
+  const blockTagNames = new Set([
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'table',
+    'thead',
+    'tbody',
+    'tr',
+    'td',
+    'th',
+    'blockquote',
+    'div',
+    'section',
+    'article',
+    'header',
+    'footer',
+    'aside',
+    'nav',
+    'pre',
+    'hr',
+  ])
+
+  // Processa recursivamente elementos internos de bloco (ex: <li> com quebras)
+  function processarElementosDeBloco(parent: Node) {
+    for (const child of Array.from(parent.childNodes)) {
+      if (child.nodeType === Node.ELEMENT_NODE) {
+        const el = child as HTMLElement
+        const tag = el.tagName.toLowerCase()
+
+        // Se for <li> ou <td> ou <blockquote >, quebras duplas/simples dentro dele viram <br /> ou parágrafos
+        if (tag === 'li' || tag === 'td' || tag === 'th') {
+          processarQuebrasEmElementoInline(el)
+        } else {
+          processarElementosDeBloco(child)
+        }
+      }
+    }
+  }
+
+  // Converte nós de texto dentro de um elemento folha ou sem blocos aninhados
+  function processarQuebrasEmElementoInline(parent: HTMLElement) {
+    const childNodes = Array.from(parent.childNodes)
+    for (const child of childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const rawText = child.textContent || ''
+        if (rawText.includes('\n')) {
+          const normalizado = rawText.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+          const partes = normalizado.split('\n')
+          const fragment = doc.createDocumentFragment()
+          partes.forEach((parte, idx) => {
+            if (idx > 0) {
+              fragment.appendChild(doc.createElement('br'))
+            }
+            if (parte) {
+              fragment.appendChild(doc.createTextNode(parte))
+            }
+          })
+          parent.replaceChild(fragment, child)
+        }
+      }
+    }
+  }
+
+  // Primeiro trata os elementos de bloco existentes (ex: listas, tabelas)
+  processarElementosDeBloco(body)
+
+  // Agora trata o nível superior (body) agrupando nós soltos/inline entre elementos de bloco
+  const novosFilhos: Node[] = []
+  let bufferInline: Node[] = []
+
+  function flushInlineBuffer() {
+    if (bufferInline.length === 0) return
+
+    // Verifica se há apenas espaços vazios
+    const textoTotal = bufferInline.map((n) => n.textContent || '').join('')
+    if (!textoTotal.trim()) {
+      bufferInline = []
+      return
+    }
+
+    const fragment = doc.createDocumentFragment()
+    bufferInline.forEach((n) => fragment.appendChild(n))
+    bufferInline = []
+
+    // Criar um container temporário para ler o HTML interno do buffer inline
+    const tempDiv = doc.createElement('div')
+    tempDiv.appendChild(fragment)
+    const rawInlineHtml = tempDiv.innerHTML
+
+    // Normalizar quebras de linha CRLF -> LF
+    const normalizado = rawInlineHtml.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+
+    // Dividir por quebras duplas (parágrafos)
+    const paragrafos = normalizado.split(/\n{2,}/)
+
+    for (const pStr of paragrafos) {
+      const pTrim = pStr.trim()
+      if (!pTrim) continue
+
+      // Quebras simples dentro do parágrafo viram <br />
+      const comBr = pTrim
+        .split('\n')
+        .map((l) => l.trim())
+        .filter(Boolean)
+        .join('<br />')
+
+      if (comBr) {
+        const pEl = doc.createElement('p')
+        pEl.innerHTML = comBr
+        novosFilhos.push(pEl)
+      }
+    }
+  }
+
+  for (const child of Array.from(body.childNodes)) {
+    if (child.nodeType === Node.ELEMENT_NODE) {
+      const el = child as HTMLElement
+      const tag = el.tagName.toLowerCase()
+
+      if (blockTagNames.has(tag)) {
+        flushInlineBuffer()
+        novosFilhos.push(child)
+      } else {
+        // Elemento inline solto (ex: <strong>, <a>, <em>, <br>)
+        bufferInline.push(child)
+      }
+    } else if (child.nodeType === Node.TEXT_NODE) {
+      bufferInline.push(child)
+    } else {
+      novosFilhos.push(child)
+    }
+  }
+
+  flushInlineBuffer()
+
+  // Se nenhum filho foi gerado (ex: apenas texto puro já agrupado), novosFilhos terá todos os nós
+  body.innerHTML = ''
+  novosFilhos.forEach((n) => body.appendChild(n))
+
+  return body.innerHTML
+}
+
+/**
+ * Converte texto do termo para HTML estruturado e seguro:
+ * 1. Texto puro (sem nenhuma tag HTML) => quebra dupla vira <p>, quebra simples vira <br />
+ * 2. Conteúdo misto ou HTML puro => processa nós de texto preservando tags HTML (ex: <ul>/<li>),
+ *    quebras duplas viram <p>, quebras simples viram <br />
+ * 3. Aplica sanitização contra XSS (sanitizeHtml)
+ */
+export function formatarConteudoTermoParaHtml(conteudoBruto: string | null | undefined): string {
+  if (!conteudoBruto) return ''
+
+  const texto = conteudoBruto.trim()
+  if (!texto) return ''
+
+  let htmlBruto: string
+
+  if (!contemMarcacaoHtml(texto)) {
+    // Caso 1: Texto puro
+    htmlBruto = converterTextoPuroParaParagrafos(texto)
+  } else {
+    // Caso 2 & 3: Conteúdo misto ou HTML puro
+    htmlBruto = converterConteudoMistoParaHtml(texto)
+  }
+
+  // Sanitização final contra XSS e atributos inseguros
+  return sanitizeHtml(htmlBruto)
 }
 
 /**
