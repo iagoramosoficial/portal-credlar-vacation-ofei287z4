@@ -2,8 +2,8 @@ import React, { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import pb from '@/lib/pocketbase/client'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
-import { sanitizeHtml } from '@/lib/sanitize'
 import { formatarApenasData } from '@/lib/timezone'
+import { TermoConteudo } from '@/components/TermoConteudo'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 import {
   ShieldCheck,
@@ -505,16 +505,11 @@ export const CadastroLiderPage: React.FC = () => {
                   )}
                 </div>
 
-                <div className="border border-neutral-200 rounded-xl p-4 bg-neutral-50/50 max-h-56 overflow-y-auto text-xs text-neutral-700 leading-relaxed shadow-inner">
+                <div className="border border-neutral-200 rounded-xl p-4 sm:p-5 bg-white max-h-72 sm:max-h-80 overflow-y-auto shadow-inner">
                   {dadosConvite?.termo?.conteudo ? (
-                    <div
-                      dangerouslySetInnerHTML={{
-                        __html: sanitizeHtml(dadosConvite.termo.conteudo),
-                      }}
-                      className="prose prose-sm max-w-none space-y-2 text-neutral-700"
-                    />
+                    <TermoConteudo conteudo={dadosConvite.termo.conteudo} variant="light" />
                   ) : (
-                    <p className="text-neutral-500 italic">
+                    <p className="text-neutral-500 italic text-sm">
                       Termo de autorização padrão para inclusão de foto e dados biográficos no Hall
                       da Fama da UniCredlar.
                     </p>

@@ -45,7 +45,9 @@ import {
   Italic,
   List,
   Link as LinkIcon,
+  Search,
 } from 'lucide-react'
+import { TermoConteudo } from '@/components/TermoConteudo'
 
 // Fusos Horários do Brasil + Portugal
 const FUSOS_HORARIOS = [
@@ -104,6 +106,10 @@ export const AdminConfiguracoesPage: React.FC = () => {
   const [conteudoNovoTermo, setConteudoNovoTermo] = useState('')
   const [proximaVersao, setProximaVersao] = useState<number>(1)
   const [salvandoNovoTermo, setSalvandoNovoTermo] = useState(false)
+
+  // Modal Visualizar Termo
+  const [termoParaVisualizar, setTermoParaVisualizar] = useState<TermoItem | null>(null)
+  const [modalVisualizarOpen, setModalVisualizarOpen] = useState(false)
 
   // Modal Tornar Vigente
   const [modalVigenteOpen, setModalVigenteOpen] = useState(false)
@@ -342,6 +348,76 @@ export const AdminConfiguracoesPage: React.FC = () => {
     setTituloNovoTermo(ultimoTitulo)
     setConteudoNovoTermo(ultimoConteudo)
     setModalNovoTermoOpen(true)
+  }
+
+  // Interceptar colagem para garantir preservação de parágrafos de Word / Docs / HTML
+  const handlePasteConteudo = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const clipboardData = e.clipboardData
+    if (!clipboardData) return
+
+    const htmlData = clipboardData.getData('text/html')
+    const plainText = clipboardData.getData('text/plain')
+
+    // Se houver HTML enriquecido (Word, Google Docs, e-mail),
+    // verificar se tem estrutura de parágrafos ou quebras
+    if (htmlData && /<(p|br|div|h[1-6]|li|ul|ol)\b/i.test(htmlData)) {
+      try {
+        const parser = new DOMParser()
+        const doc = parser.parseFromString(htmlData, 'text/html')
+
+        // Remove tags de metadados do Word/Docs
+        doc.querySelectorAll('style, meta, link, script, xml, o\\:p').forEach((el) => el.remove())
+
+        // Percorre elementos de bloco para extrair texto com quebras duplas
+        const blockElements = doc.body.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, li, tr')
+        if (blockElements.length > 0) {
+          const lines: string[] = []
+          blockElements.forEach((el) => {
+            const text = (el.textContent || '').trim()
+            if (text) {
+              lines.push(text)
+            }
+          })
+
+          if (lines.length > 1) {
+            e.preventDefault()
+            const textToInsert = lines.join('\n\n')
+            const textarea = e.currentTarget
+            const start = textarea.selectionStart
+            const end = textarea.selectionEnd
+            const novoConteudo =
+              conteudoNovoTermo.substring(0, start) +
+              textToInsert +
+              conteudoNovoTermo.substring(end)
+            setConteudoNovoTermo(novoConteudo)
+            setTimeout(() => {
+              textarea.focus()
+              textarea.setSelectionRange(start + textToInsert.length, start + textToInsert.length)
+            }, 0)
+            return
+          }
+        }
+      } catch {
+        // Fallback para colagem padrão
+      }
+    }
+
+    // Se o texto puro já veio com quebras de linha normais, deixa o navegador colar normalmente
+    // Mas se o texto puro contiver quebras de linha Windows \r\n, normaliza
+    if (plainText && plainText.includes('\r')) {
+      e.preventDefault()
+      const normalized = plainText.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
+      const textarea = e.currentTarget
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+      const novoConteudo =
+        conteudoNovoTermo.substring(0, start) + normalized + conteudoNovoTermo.substring(end)
+      setConteudoNovoTermo(novoConteudo)
+      setTimeout(() => {
+        textarea.focus()
+        textarea.setSelectionRange(start + normalized.length, start + normalized.length)
+      }, 0)
+    }
   }
 
   // Editor simples: inserir tag ao redor do texto selecionado
@@ -1264,6 +1340,19 @@ export const AdminConfiguracoesPage: React.FC = () => {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                setTermoParaVisualizar(t)
+                                setModalVisualizarOpen(true)
+                              }}
+                              className="h-7 text-[11px] text-neutral-300 hover:text-white px-2 flex items-center gap-1"
+                              title="Visualizar formatação do termo"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-brand-orange" />
+                              Visualizar
+                            </Button>
                             {!t.vigente && (
                               <Button
                                 size="sm"
@@ -1394,16 +1483,40 @@ export const AdminConfiguracoesPage: React.FC = () => {
 
               <textarea
                 ref={textareaRef}
-                rows={12}
+                rows={10}
                 value={conteudoNovoTermo}
                 onChange={(e) => setConteudoNovoTermo(e.target.value)}
-                placeholder="Insira aqui o texto completo do termo legal..."
+                onPaste={handlePasteConteudo}
+                placeholder="Insira aqui o texto completo do termo legal... (Textos colados de Word, Docs ou e-mail mantêm os parágrafos)"
                 className="w-full rounded-md bg-neutral-950 border border-neutral-800 p-3 text-xs text-neutral-200 font-mono leading-relaxed focus:border-brand-orange focus:outline-none"
               />
               <p className="text-[11px] text-neutral-500">
-                O conteúdo será renderizado de forma segura com sanitização de HTML contra scripts
-                maliciosos.
+                O conteúdo aceita texto puro ou HTML. Quebras duplas viram novos parágrafos
+                automaticamente.
               </p>
+            </div>
+
+            {/* Pré-visualização com o MESMO componente de exibição */}
+            <div className="space-y-1.5 pt-2 border-t border-neutral-800">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs font-semibold text-brand-orange flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5" />
+                  Pré-visualização ao Vivo (exatamente como aparecerá aos usuários)
+                </Label>
+                <span className="text-[10px] text-neutral-500 uppercase tracking-wider">
+                  Prévia do Termo
+                </span>
+              </div>
+              <div className="rounded-xl border border-neutral-800 bg-neutral-950/80 p-4 sm:p-5 max-h-60 overflow-y-auto shadow-inner">
+                {conteudoNovoTermo.trim() ? (
+                  <TermoConteudo conteudo={conteudoNovoTermo} variant="dark" />
+                ) : (
+                  <p className="text-neutral-500 italic text-xs">
+                    Digite ou cole o texto acima para ver a pré-visualização formatada em tempo
+                    real...
+                  </p>
+                )}
+              </div>
             </div>
 
             <DialogFooter className="pt-3 border-t border-neutral-800 flex items-center justify-end gap-2">
@@ -1428,6 +1541,51 @@ export const AdminConfiguracoesPage: React.FC = () => {
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Visualizar Termo do Painel */}
+      <Dialog open={modalVisualizarOpen} onOpenChange={setModalVisualizarOpen}>
+        <DialogContent className="bg-neutral-900 border border-neutral-800 text-neutral-100 max-w-3xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <div className="flex items-center justify-between gap-2 pr-6">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-brand-orange" />
+                <DialogTitle className="text-base text-white">
+                  {termoParaVisualizar?.titulo}
+                </DialogTitle>
+              </div>
+              {termoParaVisualizar && (
+                <span className="text-xs px-2 py-0.5 rounded font-semibold bg-neutral-800 text-neutral-300">
+                  v{termoParaVisualizar.versao} {termoParaVisualizar.vigente ? '(Vigente)' : ''}
+                </span>
+              )}
+            </div>
+            <DialogDescription className="text-neutral-400 text-xs">
+              Visualização fiel da formatação do termo, renderizada com o componente oficial.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-neutral-950/70 rounded-xl border border-neutral-800 mt-2 max-h-[60vh]">
+            <TermoConteudo conteudo={termoParaVisualizar?.conteudo} variant="dark" />
+          </div>
+
+          <DialogFooter className="pt-4 border-t border-neutral-800 flex items-center justify-between gap-2">
+            <span className="text-[11px] text-neutral-500">
+              {termoParaVisualizar?.tipo === 'privacidade'
+                ? 'Aviso de Privacidade'
+                : 'Uso de Imagem'}
+            </span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setModalVisualizarOpen(false)}
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

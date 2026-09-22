@@ -4,7 +4,7 @@ import { ArrowLeft, Shield } from 'lucide-react'
 import { pb } from '@/lib/pocketbase'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
 import { Footer } from '@/components/Footer'
-import { sanitizeHtml } from '@/lib/sanitize'
+import { TermoConteudo } from '@/components/TermoConteudo'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 
 interface TermoPrivacidade {
@@ -112,13 +112,8 @@ export const PrivacidadePage: React.FC = () => {
                 </h1>
               </div>
 
-              {/* Renderização com HTML sanitizado */}
-              <div
-                className="prose prose-neutral max-w-none text-neutral-700 leading-relaxed text-sm md:text-base space-y-4 prose-headings:font-bold prose-headings:text-neutral-900 prose-a:text-brand-orange hover:prose-a:underline prose-strong:text-neutral-900"
-                dangerouslySetInnerHTML={{
-                  __html: sanitizeHtml(termo.conteudo || ''),
-                }}
-              />
+              {/* Renderização com HTML sanitizado e suporte a texto puro */}
+              <TermoConteudo conteudo={termo.conteudo} variant="light" />
             </article>
           )}
         </div>
