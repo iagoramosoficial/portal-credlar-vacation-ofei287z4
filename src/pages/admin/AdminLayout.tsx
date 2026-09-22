@@ -249,7 +249,7 @@ export const AdminLayout: React.FC = () => {
                 setMobileMenuOpen(false)
                 logout()
               }}
-              className="w-full justify-center border-neutral-800 hover:bg-red-500/10 hover:text-red-400 text-neutral-300"
+              className="w-full justify-center border-neutral-700 bg-neutral-900/80 hover:bg-red-500/10 hover:text-red-400 text-neutral-200"
             >
               <LogOut className="w-4 h-4 mr-2 text-red-400" />
               Sair do Painel
@@ -365,7 +365,7 @@ export const AdminLayout: React.FC = () => {
                 size="sm"
                 onClick={handleExportCliques}
                 disabled={cliquesLoading || cliquesList.length === 0}
-                className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-800 text-white text-xs"
+                className="border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-white hover:text-white text-xs"
               >
                 Exportar planilha (CSV)
               </Button>

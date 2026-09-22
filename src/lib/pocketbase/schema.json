@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T00:06:18.437Z",
+  "generatedAt": "2026-09-22T00:51:21.757Z",
   "collections": [
     {
       "name": "users",
@@ -222,6 +222,12 @@
         {
           "name": "mensagem_convite",
           "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "url_publica",
+          "type": "url",
           "required": false,
           "system": false
         }

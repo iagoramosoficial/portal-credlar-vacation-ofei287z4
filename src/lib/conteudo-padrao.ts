@@ -28,6 +28,22 @@ export interface ConfiguracoesSite {
   cor_fundo_claro?: string
   // Etapa 1D
   mensagem_convite?: string
+  url_publica?: string
+}
+
+/**
+ * Retorna o endereço público do site:
+ * Usa url_publica quando preenchida (sem barra no final) e, se vazia, window.location.origin.
+ */
+export function getUrlPublica(urlConfigurada?: string | null): string {
+  const limpa = (urlConfigurada || '').trim().replace(/\/+$/, '')
+  if (limpa) {
+    return limpa
+  }
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return window.location.origin.replace(/\/+$/, '')
+  }
+  return ''
 }
 
 export const CORES_PADRAO_HEX = {
@@ -76,6 +92,7 @@ export const CONFIGURACOES_PADRAO: ConfiguracoesSite = {
   fuso_horario: 'America/Sao_Paulo',
   mensagem_convite:
     'Olá, {nome}! Você foi convidado(a) para o Hall da Fama da UniCredlar. Para completar seu cadastro e autorizar o uso da sua foto, acesse: {link} (válido até {validade}).',
+  url_publica: '',
   ...CORES_PADRAO_HEX,
 }
 

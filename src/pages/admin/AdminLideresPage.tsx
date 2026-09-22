@@ -49,6 +49,7 @@ import {
 import { useAdminAuth } from '@/contexts/AdminAuthContext'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
 import { useToast } from '@/hooks/use-toast'
+import { getUrlPublica } from '@/lib/conteudo-padrao'
 import { exportarParaCsv } from '@/lib/export-csv'
 import { formatarDataHora, formatarApenasData } from '@/lib/timezone'
 import pb from '@/lib/pocketbase/client'
@@ -277,9 +278,9 @@ export const AdminLideresPage: React.FC = () => {
         )
       }
 
-      // Montar link completo baseado na URL atual da aplicação
-      const frontendOrigin = window.location.origin
-      const linkCompleto = `${frontendOrigin}${convite.link}`
+      // Montar link completo baseado no endereço público configurado ou na URL atual
+      const baseUrl = getUrlPublica(config?.url_publica)
+      const linkCompleto = `${baseUrl}${convite.link}`
 
       // Formatar validade no fuso configurado
       const validadeFormatada = formatarApenasData(convite.expira_em)
@@ -490,7 +491,7 @@ export const AdminLideresPage: React.FC = () => {
             size="sm"
             onClick={handleExportarCsv}
             disabled={loading || lideresFiltrados.length === 0}
-            className="border-neutral-800 bg-neutral-900/60 hover:bg-neutral-800 text-neutral-200 text-xs h-9"
+            className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-100 hover:text-white text-xs h-9"
           >
             <Download className="w-3.5 h-3.5 mr-1.5" />
             Exportar planilha
@@ -544,7 +545,7 @@ export const AdminLideresPage: React.FC = () => {
         <div className="w-full sm:w-56 shrink-0">
           <Select value={filtroStatus} onValueChange={setFiltroStatus}>
             <SelectTrigger className="h-10 text-xs bg-neutral-900/60 border-neutral-800 text-neutral-200">
-              <Filter className="w-3.5 h-3.5 mr-2 text-neutral-400" />
+              <Filter className="w-3.5 h-3.5 mr-2 text-neutral-300" />
               <SelectValue placeholder="Filtrar por status" />
             </SelectTrigger>
             <SelectContent className="bg-neutral-900 border-neutral-800 text-neutral-200 text-xs">
@@ -750,7 +751,7 @@ export const AdminLideresPage: React.FC = () => {
                 size="sm"
                 onClick={() => setModalFormOpen(false)}
                 disabled={salvandoForm}
-                className="border-neutral-800 text-neutral-300 text-xs"
+                className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
               >
                 Cancelar
               </Button>
@@ -768,11 +769,11 @@ export const AdminLideresPage: React.FC = () => {
 
       {/* Modal de Convite Gerado com Opções de Copiar */}
       <Dialog open={modalConviteOpen} onOpenChange={setModalConviteOpen}>
-        <DialogContent className="bg-neutral-900 border-neutral-800 text-neutral-100 max-w-lg">
+        <DialogContent className="bg-neutral-900 border-neutral-800 text-neutral-100 w-[calc(100vw-2rem)] sm:w-full sm:max-w-2xl max-w-2xl max-h-[92vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
           <DialogHeader>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-brand-orange" />
-              <DialogTitle className="text-base font-bold text-white">
+              <Sparkles className="w-5 h-5 text-brand-orange shrink-0" />
+              <DialogTitle className="text-base sm:text-lg font-bold text-white">
                 Convite Gerado com Sucesso
               </DialogTitle>
             </div>
@@ -782,31 +783,31 @@ export const AdminLideresPage: React.FC = () => {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 my-3">
+          <div className="space-y-4 my-3 w-full min-w-0">
             {/* Campo Link Completo */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 w-full min-w-0">
               <label className="text-xs font-medium text-neutral-300">Link direto de acesso</label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full min-w-0">
                 <Input
                   readOnly
                   value={conviteGeradoInfo?.linkCompleto || ''}
-                  className="h-9 text-xs font-mono bg-neutral-950 border-neutral-800 text-neutral-300 select-all"
+                  className="flex-1 min-w-0 h-9 text-xs font-mono bg-neutral-950 border-neutral-800 text-neutral-200 select-all truncate"
                 />
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={handleCopiarLink}
-                  className="border-neutral-700 hover:bg-neutral-800 text-xs shrink-0"
+                  className="shrink-0 border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-white hover:text-white text-xs font-medium transition"
                 >
                   {linkCopiado ? (
                     <>
                       <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
-                      Copiado
+                      <span className="text-emerald-300">Copiado</span>
                     </>
                   ) : (
                     <>
-                      <Copy className="w-3.5 h-3.5 mr-1" />
-                      Copiar Link
+                      <Copy className="w-3.5 h-3.5 mr-1 text-neutral-300" />
+                      <span>Copiar Link</span>
                     </>
                   )}
                 </Button>
@@ -814,29 +815,29 @@ export const AdminLideresPage: React.FC = () => {
             </div>
 
             {/* Mensagem Formatada para WhatsApp */}
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 w-full min-w-0">
               <label className="text-xs font-medium text-neutral-300">
                 Mensagem formatada para WhatsApp
               </label>
-              <div className="p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-xs text-neutral-300 whitespace-pre-wrap leading-relaxed max-h-32 overflow-y-auto font-sans">
+              <div className="w-full min-w-0 p-3 rounded-lg bg-neutral-950 border border-neutral-800 text-xs text-neutral-200 whitespace-pre-wrap break-all leading-relaxed max-h-40 overflow-y-auto overflow-x-hidden font-sans">
                 {conviteGeradoInfo?.mensagemWhatsApp}
               </div>
             </div>
           </div>
 
-          <DialogFooter className="gap-2 sm:justify-between flex-col sm:flex-row">
+          <DialogFooter className="gap-2 sm:justify-between flex-col sm:flex-row pt-2 border-t border-neutral-800/80">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setModalConviteOpen(false)}
-              className="border-neutral-800 text-neutral-300 text-xs"
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
             >
               Fechar
             </Button>
             <Button
               size="sm"
               onClick={handleCopiarWhatsApp}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
             >
               {msgCopiada ? (
                 <>
@@ -928,7 +929,7 @@ export const AdminLideresPage: React.FC = () => {
                       size="sm"
                       onClick={(e) => handleGerarConvite(liderSelecionado, e)}
                       disabled={!termoVigente || gerandoConviteId === liderSelecionado.id}
-                      className="border-neutral-700 hover:bg-neutral-800 text-xs"
+                      className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-100 hover:text-white text-xs"
                     >
                       <Link2 className="w-3.5 h-3.5 mr-1 text-brand-orange" />
                       Gerar Novo Convite
@@ -943,7 +944,7 @@ export const AdminLideresPage: React.FC = () => {
                         setLiderParaRevogar(liderSelecionado)
                         setModalRevogarPainelOpen(true)
                       }}
-                      className="border-red-900/60 text-red-400 hover:bg-red-500/10 text-xs"
+                      className="border-red-700/80 bg-red-950/40 text-red-300 hover:bg-red-900/40 hover:text-red-200 text-xs"
                     >
                       <ShieldAlert className="w-3.5 h-3.5 mr-1" />
                       Registrar revogação
@@ -1029,7 +1030,7 @@ export const AdminLideresPage: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setLiderSelecionado(null)}
-              className="border-neutral-800 text-neutral-300 text-xs"
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
             >
               Fechar Ficha
             </Button>
@@ -1053,7 +1054,7 @@ export const AdminLideresPage: React.FC = () => {
               size="sm"
               onClick={() => setModalExcluirOpen(false)}
               disabled={excluindo}
-              className="border-neutral-800 text-neutral-300 text-xs"
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
             >
               Cancelar
             </Button>
@@ -1089,7 +1090,7 @@ export const AdminLideresPage: React.FC = () => {
               size="sm"
               onClick={() => setModalRevogarPainelOpen(false)}
               disabled={revogando}
-              className="border-neutral-800 text-neutral-300 text-xs"
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
             >
               Cancelar
             </Button>

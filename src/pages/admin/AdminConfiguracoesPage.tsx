@@ -229,6 +229,7 @@ export const AdminConfiguracoesPage: React.FC = () => {
       const formData = new FormData()
       formData.append('nome_empresa', marcaData.nome_empresa || '')
       formData.append('titulo_pagina', marcaData.titulo_pagina || '')
+      formData.append('url_publica', marcaData.url_publica || '')
       formData.append('cor_primaria', marcaData.cor_primaria || '#CC1F1F')
       formData.append('cor_secundaria', marcaData.cor_secundaria || '#E85C1A')
       formData.append('cor_destaque', marcaData.cor_destaque || '#F5A623')
@@ -553,6 +554,26 @@ export const AdminConfiguracoesPage: React.FC = () => {
                     required
                   />
                 </div>
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <Label htmlFor="url_publica" className="text-xs font-medium text-neutral-300">
+                    Endereço público do site
+                  </Label>
+                  <Input
+                    id="url_publica"
+                    type="url"
+                    value={marcaData.url_publica || ''}
+                    onChange={(e) =>
+                      setMarcaData((prev) => ({ ...prev, url_publica: e.target.value }))
+                    }
+                    placeholder="https://seusite.com.br"
+                    className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange text-xs"
+                  />
+                  <p className="text-[11px] text-neutral-400">
+                    Usado para montar os links enviados aos colaboradores. Ex.:
+                    https://seusite.com.br
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -663,7 +684,7 @@ export const AdminConfiguracoesPage: React.FC = () => {
                   variant="outline"
                   size="sm"
                   onClick={handleRestaurarCoresPadrao}
-                  className="border-neutral-700 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs flex items-center gap-1.5 self-start sm:self-auto"
+                  className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-white hover:text-white text-xs flex items-center gap-1.5 self-start sm:self-auto"
                 >
                   <RotateCcw className="w-3.5 h-3.5 text-neutral-400" />
                   Restaurar Cores Padrão
@@ -1251,7 +1272,7 @@ export const AdminConfiguracoesPage: React.FC = () => {
                                   setTermoParaVigente(t)
                                   setModalVigenteOpen(true)
                                 }}
-                                className="h-7 text-[11px] border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 px-2.5"
+                                className="h-7 text-[11px] border-emerald-500/50 bg-neutral-800/80 text-emerald-300 hover:bg-emerald-500/20 hover:text-emerald-200 px-2.5"
                               >
                                 Tornar vigente
                               </Button>
@@ -1391,7 +1412,7 @@ export const AdminConfiguracoesPage: React.FC = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setModalNovoTermoOpen(false)}
-                className="border-neutral-700 bg-neutral-800 text-neutral-300 text-xs"
+                className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
               >
                 Cancelar
               </Button>
@@ -1434,7 +1455,7 @@ export const AdminConfiguracoesPage: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setModalVigenteOpen(false)}
-              className="border-neutral-700 bg-neutral-800 text-neutral-300 text-xs"
+              className="border-neutral-700 bg-neutral-800/90 text-neutral-200 hover:bg-neutral-700 hover:text-white text-xs"
             >
               Cancelar
             </Button>

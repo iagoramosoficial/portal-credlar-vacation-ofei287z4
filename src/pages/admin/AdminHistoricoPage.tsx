@@ -140,7 +140,7 @@ export const AdminHistoricoPage: React.FC = () => {
             size="sm"
             onClick={handleExportarCsv}
             disabled={carregando || historico.length === 0}
-            className="border-neutral-700 bg-neutral-900 hover:bg-neutral-800 text-white text-xs flex items-center gap-2"
+            className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-100 hover:text-white text-xs flex items-center gap-2"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
             Exportar planilha (CSV)
