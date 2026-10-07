@@ -35,7 +35,6 @@ export interface LiderItem {
   data_admissao?: string
   foto?: string
   status: LiderStatus
-  token_convite?: string
   convite_expira_em?: string
   termo_aceito?: string
   created: string
@@ -272,6 +271,23 @@ export const adminService = {
         method: 'POST',
       },
     )
+    return res
+  },
+
+  async getLinkFotoLider(id: string): Promise<{
+    link: string
+    mensagem: string
+    validade: string
+    nome: string
+  }> {
+    const res = await pb.send<{
+      link: string
+      mensagem: string
+      validade: string
+      nome: string
+    }>(`/backend/v1/lideres/${id}/link-foto`, {
+      method: 'GET',
+    })
     return res
   },
 

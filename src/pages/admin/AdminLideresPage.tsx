@@ -95,6 +95,8 @@ export const AdminLideresPage: React.FC = () => {
     mensagemWhatsApp: string
   } | null>(null)
   const [gerandoConviteId, setGerandoConviteId] = useState<string | null>(null)
+  const [carregandoLinkFoto, setCarregandoLinkFoto] = useState(false)
+  const [linkFotoCopiadoFicha, setLinkFotoCopiadoFicha] = useState(false)
   const [linkCopiado, setLinkCopiado] = useState(false)
   const [msgCopiada, setMsgCopiada] = useState(false)
 
@@ -320,33 +322,48 @@ export const AdminLideresPage: React.FC = () => {
     }
   }
 
-  // Abrir modal com link para líder autorizado atualizar a foto
-  const handleAbrirLinkAtualizacaoFoto = (lider: LiderItem) => {
-    const token = lider.token_convite
-    if (!token) {
+  // Obter link para líder autorizado atualizar a foto através do servidor
+  const handleCopiarLinkAtualizacaoFoto = async (lider: LiderItem) => {
+    setCarregandoLinkFoto(true)
+    try {
+      const res = await adminService.getLinkFotoLider(lider.id)
+      const link = res.link
+      if (link && navigator?.clipboard) {
+        await navigator.clipboard.writeText(link)
+      }
+
+      setLinkFotoCopiadoFicha(true)
+      setTimeout(() => setLinkFotoCopiadoFicha(false), 3000)
+
       toast({
-        title: 'Token indisponível',
-        description: 'Não foi possível encontrar o token de acesso deste líder.',
+        title: 'Link copiado!',
+        description: 'Link de atualização de foto copiado para a área de transferência.',
+      })
+
+      // Também abre o modal de compartilhamento com a mensagem pronta para WhatsApp retornada pelo servidor
+      setConviteGeradoInfo({
+        tituloModal: 'Link de Atualização de Foto',
+        descricaoModal: `Link direto para ${res.nome || lider.nome} atualizar sua foto.`,
+        liderNome: res.nome || lider.nome,
+        linkCompleto: res.link,
+        validadeFormatada: res.validade,
+        mensagemWhatsApp: res.mensagem,
+      })
+      setLinkCopiado(true)
+      setMsgCopiada(false)
+      setModalConviteOpen(true)
+    } catch (err: unknown) {
+      const pbErr = err as { data?: { message?: string }; message?: string }
+      const msgErro =
+        pbErr?.data?.message || pbErr?.message || 'Erro ao obter link de atualização de foto.'
+      toast({
+        title: 'Não foi possível obter o link',
+        description: msgErro,
         variant: 'destructive',
       })
-      return
+    } finally {
+      setCarregandoLinkFoto(false)
     }
-
-    const baseUrl = getUrlPublica(config?.url_publica)
-    const linkCompleto = `${baseUrl}/cadastro/${token}`
-
-    const msgWhats = `Olá, ${lider.nome_exibicao || lider.nome}! Para atualizar a sua foto no Hall da Fama da UniCredlar, acesse o link seguro: ${linkCompleto} e clique em "Atualizar minha foto".`
-
-    setConviteGeradoInfo({
-      tituloModal: 'Link de Atualização de Foto',
-      descricaoModal: `Link direto para ${lider.nome} atualizar sua foto sem refazer o consentimento.`,
-      liderNome: lider.nome,
-      linkCompleto,
-      mensagemWhatsApp: msgWhats,
-    })
-    setLinkCopiado(false)
-    setMsgCopiada(false)
-    setModalConviteOpen(true)
   }
 
   // Revogar pelo Painel
@@ -978,12 +995,27 @@ export const AdminLideresPage: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleAbrirLinkAtualizacaoFoto(liderSelecionado)}
+                        onClick={() => handleCopiarLinkAtualizacaoFoto(liderSelecionado)}
+                        disabled={carregandoLinkFoto}
                         className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-100 hover:text-white text-xs"
                         title="Copiar link para o líder atualizar sua foto"
                       >
-                        <Camera className="w-3.5 h-3.5 mr-1 text-brand-orange" />
-                        Copiar link de atualização de foto
+                        {linkFotoCopiadoFicha ? (
+                          <>
+                            <Check className="w-3.5 h-3.5 mr-1 text-emerald-400" />
+                            <span className="text-emerald-300">Copiado!</span>
+                          </>
+                        ) : carregandoLinkFoto ? (
+                          <>
+                            <div className="w-3.5 h-3.5 mr-1 border-2 border-brand-orange border-t-transparent rounded-full animate-spin" />
+                            <span>Obtendo link...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                            Copiar link de atualização de foto
+                          </>
+                        )}
                       </Button>
 
                       <Button
