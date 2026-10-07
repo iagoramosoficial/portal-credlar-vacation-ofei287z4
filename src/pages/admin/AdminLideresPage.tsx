@@ -87,9 +87,11 @@ export const AdminLideresPage: React.FC = () => {
   // Modal Convite Gerado
   const [modalConviteOpen, setModalConviteOpen] = useState(false)
   const [conviteGeradoInfo, setConviteGeradoInfo] = useState<{
+    tituloModal?: string
+    descricaoModal?: string
     liderNome: string
     linkCompleto: string
-    validadeFormatada: string
+    validadeFormatada?: string
     mensagemWhatsApp: string
   } | null>(null)
   const [gerandoConviteId, setGerandoConviteId] = useState<string | null>(null)
@@ -296,6 +298,8 @@ export const AdminLideresPage: React.FC = () => {
         .replace(/{validade}/g, validadeFormatada)
 
       setConviteGeradoInfo({
+        tituloModal: 'Convite Gerado com Sucesso',
+        descricaoModal: `Convite exclusivo para ${lider.nome} com validade até ${validadeFormatada}.`,
         liderNome: lider.nome,
         linkCompleto,
         validadeFormatada,
@@ -314,6 +318,35 @@ export const AdminLideresPage: React.FC = () => {
     } finally {
       setGerandoConviteId(null)
     }
+  }
+
+  // Abrir modal com link para líder autorizado atualizar a foto
+  const handleAbrirLinkAtualizacaoFoto = (lider: LiderItem) => {
+    const token = lider.token_convite
+    if (!token) {
+      toast({
+        title: 'Token indisponível',
+        description: 'Não foi possível encontrar o token de acesso deste líder.',
+        variant: 'destructive',
+      })
+      return
+    }
+
+    const baseUrl = getUrlPublica(config?.url_publica)
+    const linkCompleto = `${baseUrl}/cadastro/${token}`
+
+    const msgWhats = `Olá, ${lider.nome_exibicao || lider.nome}! Para atualizar a sua foto no Hall da Fama da UniCredlar, acesse o link seguro: ${linkCompleto} e clique em "Atualizar minha foto".`
+
+    setConviteGeradoInfo({
+      tituloModal: 'Link de Atualização de Foto',
+      descricaoModal: `Link direto para ${lider.nome} atualizar sua foto sem refazer o consentimento.`,
+      liderNome: lider.nome,
+      linkCompleto,
+      mensagemWhatsApp: msgWhats,
+    })
+    setLinkCopiado(false)
+    setMsgCopiada(false)
+    setModalConviteOpen(true)
   }
 
   // Revogar pelo Painel
@@ -774,12 +807,16 @@ export const AdminLideresPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-brand-orange shrink-0" />
               <DialogTitle className="text-base sm:text-lg font-bold text-white">
-                Convite Gerado com Sucesso
+                {conviteGeradoInfo?.tituloModal || 'Convite Gerado com Sucesso'}
               </DialogTitle>
             </div>
             <DialogDescription className="text-xs text-neutral-400 pt-1">
-              Convite exclusivo para <strong>{conviteGeradoInfo?.liderNome}</strong> com validade
-              até {conviteGeradoInfo?.validadeFormatada}.
+              {conviteGeradoInfo?.descricaoModal || (
+                <>
+                  Convite exclusivo para <strong>{conviteGeradoInfo?.liderNome}</strong> com
+                  validade até {conviteGeradoInfo?.validadeFormatada}.
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
 
@@ -937,18 +974,31 @@ export const AdminLideresPage: React.FC = () => {
                   )}
 
                   {liderSelecionado.status === 'autorizado' && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setLiderParaRevogar(liderSelecionado)
-                        setModalRevogarPainelOpen(true)
-                      }}
-                      className="border-red-700/80 bg-red-950/40 text-red-300 hover:bg-red-900/40 hover:text-red-200 text-xs"
-                    >
-                      <ShieldAlert className="w-3.5 h-3.5 mr-1" />
-                      Registrar revogação
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAbrirLinkAtualizacaoFoto(liderSelecionado)}
+                        className="border-neutral-700 bg-neutral-800/80 hover:bg-neutral-700 text-neutral-100 hover:text-white text-xs"
+                        title="Copiar link para o líder atualizar sua foto"
+                      >
+                        <Camera className="w-3.5 h-3.5 mr-1 text-brand-orange" />
+                        Copiar link de atualização de foto
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setLiderParaRevogar(liderSelecionado)
+                          setModalRevogarPainelOpen(true)
+                        }}
+                        className="border-red-700/80 bg-red-950/40 text-red-300 hover:bg-red-900/40 hover:text-red-200 text-xs"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5 mr-1" />
+                        Registrar revogação
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>

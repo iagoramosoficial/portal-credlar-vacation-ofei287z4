@@ -49,6 +49,38 @@ export function getUrlPublica(urlConfigurada?: string | null): string {
   return ''
 }
 
+/**
+ * Garante que URLs de imagem (como foto_url do Hall da Fama) sejam completas e absolutas:
+ * Se fotoUrl vier em formato relativo (ex: /api/files/...), completa com a URL base do PocketBase backend.
+ */
+export function formatarFotoUrl(fotoUrl?: string | null, backendBaseUrl?: string): string {
+  if (!fotoUrl || !fotoUrl.trim()) return ''
+  const url = fotoUrl.trim()
+  if (
+    url.startsWith('http://') ||
+    url.startsWith('https://') ||
+    url.startsWith('data:') ||
+    url.startsWith('blob:')
+  ) {
+    return url
+  }
+
+  const base = (
+    backendBaseUrl ||
+    (typeof import.meta !== 'undefined' && import.meta.env?.VITE_POCKETBASE_URL) ||
+    ''
+  )
+    .trim()
+    .replace(/\/+$/, '')
+
+  if (!base) {
+    return url
+  }
+
+  const path = url.startsWith('/') ? url : `/${url}`
+  return `${base}${path}`
+}
+
 export const CORES_PADRAO_HEX = {
   cor_primaria: '#CC1F1F',
   cor_secundaria: '#E85C1A',

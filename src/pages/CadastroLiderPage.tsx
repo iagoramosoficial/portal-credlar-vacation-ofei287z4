@@ -4,6 +4,7 @@ import pb from '@/lib/pocketbase/client'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
 import { formatarApenasData } from '@/lib/timezone'
 import { TermoConteudo } from '@/components/TermoConteudo'
+import { ImageCropperModal } from '@/components/ImageCropperModal'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 import {
   ShieldCheck,
@@ -15,6 +16,7 @@ import {
   Calendar,
   User,
   ShieldAlert,
+  RefreshCw,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -61,15 +63,24 @@ export const CadastroLiderPage: React.FC = () => {
   const [submitting, setSubmitting] = useState(false)
   const [erroForm, setErroForm] = useState<string | null>(null)
 
+  // Estado para o recorte quadrado
+  const [cropperOpen, setCropperOpen] = useState(false)
+  const [imagemParaRecorte, setImagemParaRecorte] = useState<string | null>(null)
+  const [nomeArquivoOriginal, setNomeArquivoOriginal] = useState<string>('foto.jpg')
+  const [modoAtualizacaoFoto, setModoAtualizacaoFoto] = useState(false)
+  const [sucessoAtualizacaoFoto, setSucessoAtualizacaoFoto] = useState(false)
+
   // Referência do nome original vindo do backend para detectar alteração
   const nomeOriginalRef = useRef<string>('')
 
   // Modais de confirmação
   const [modalRecusaOpen, setModalRecusaOpen] = useState(false)
   const [modalRevogacaoOpen, setModalRevogacaoOpen] = useState(false)
+  const [modalAtualizarFotoOpen, setModalAtualizarFotoOpen] = useState(false)
   const [acaoConcluida, setAcaoConcluida] = useState<'aceite' | 'recusa' | 'revogacao' | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const fileInputAtualizacaoRef = useRef<HTMLInputElement>(null)
 
   // Meta tag noindex
   useEffect(() => {
@@ -180,20 +191,91 @@ export const CadastroLiderPage: React.FC = () => {
     const validMimes = ['image/jpeg', 'image/png', 'image/webp']
     if (!validMimes.includes(file.type)) {
       setErroForm('Formato de foto inválido. Use JPG, PNG ou WebP.')
+      e.target.value = ''
       return
     }
     if (file.size > 5 * 1024 * 1024) {
       setErroForm('A foto selecionada ultrapassa o limite de 5 MB.')
+      e.target.value = ''
       return
     }
 
     setErroForm(null)
-    setFotoArquivo(file)
+    setNomeArquivoOriginal(file.name)
+    setModoAtualizacaoFoto(false)
+
     const reader = new FileReader()
     reader.onload = () => {
-      setFotoPreview(reader.result as string)
+      setImagemParaRecorte(reader.result as string)
+      setCropperOpen(true)
     }
     reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  // Lidar com seleção de foto para atualização (status autorizado)
+  const handleFileChangeAtualizacao = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const validMimes = ['image/jpeg', 'image/png', 'image/webp']
+    if (!validMimes.includes(file.type)) {
+      setErroForm('Formato de foto inválido. Use JPG, PNG ou WebP.')
+      e.target.value = ''
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setErroForm('A foto selecionada ultrapassa o limite de 5 MB.')
+      e.target.value = ''
+      return
+    }
+
+    setErroForm(null)
+    setNomeArquivoOriginal(file.name)
+    setModoAtualizacaoFoto(true)
+
+    const reader = new FileReader()
+    reader.onload = () => {
+      setImagemParaRecorte(reader.result as string)
+      setCropperOpen(true)
+    }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  // Confirmar recorte (800x800 JPEG 0.85)
+  const handleConfirmarRecorte = async (croppedFile: File, previewUrl: string) => {
+    setCropperOpen(false)
+    setFotoArquivo(croppedFile)
+    setFotoPreview(previewUrl)
+
+    // Se estiver no fluxo de atualização rápida para líder já autorizado:
+    if (modoAtualizacaoFoto) {
+      setSubmitting(true)
+      setErroForm(null)
+      try {
+        const formData = new FormData()
+        formData.append('foto', croppedFile)
+
+        await pb.send(`/backend/v1/cadastro/${token}/foto`, {
+          method: 'POST',
+          body: formData,
+        })
+
+        setSucessoAtualizacaoFoto(true)
+        setModalAtualizarFotoOpen(false)
+      } catch (err: unknown) {
+        const pbErr = err as { data?: { message?: string }; message?: string }
+        setErroForm(
+          pbErr?.data?.message ||
+            pbErr?.message ||
+            'Não foi possível atualizar sua foto. Tente novamente.',
+        )
+      } finally {
+        setSubmitting(false)
+        setModoAtualizacaoFoto(false)
+      }
+    }
   }
 
   // Submissão de aceite
@@ -393,18 +475,66 @@ export const CadastroLiderPage: React.FC = () => {
               </p>
             </div>
 
-            <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-600 text-xs text-left">
+            {sucessoAtualizacaoFoto && (
+              <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span>
+                  Sua foto foi atualizada com sucesso! Seu consentimento permanece inalterado.
+                </span>
+              </div>
+            )}
+
+            {erroForm && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 text-left">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{erroForm}</span>
+              </div>
+            )}
+
+            {fotoPreview && (
+              <div className="flex flex-col items-center justify-center gap-2 pt-2">
+                <p className="text-xs font-semibold text-neutral-600">Nova foto enviada:</p>
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-brand-orange shadow-sm">
+                  <img src={fotoPreview} alt="Foto nova" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            )}
+
+            <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-600 text-xs text-left space-y-1.5">
               <p>
-                Caso deseje retirar a sua foto e cancelar a veiculação de sua imagem no ecossistema,
-                você pode revogar a autorização clicando no botão abaixo.
+                Você pode <strong>atualizar sua foto</strong> a qualquer momento sem precisar
+                refazer o termo de consentimento.
+              </p>
+              <p>
+                Caso deseje retirar definitivamente a sua foto e cancelar a veiculação de sua imagem
+                no ecossistema, clique em revogar autorização.
               </p>
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <input
+                ref={fileInputAtualizacaoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleFileChangeAtualizacao}
+              />
+
+              <Button
+                type="button"
+                onClick={() => fileInputAtualizacaoRef.current?.click()}
+                disabled={submitting}
+                className="bg-gradient-brand text-white hover:opacity-90 w-full sm:w-auto text-xs h-10 px-5 font-semibold gap-1.5 shadow-sm"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${submitting ? 'animate-spin' : ''}`} />
+                <span>{submitting ? 'Enviando nova foto...' : 'Atualizar minha foto'}</span>
+              </Button>
+
               <Button
                 variant="outline"
                 onClick={() => setModalRevogacaoOpen(true)}
-                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 w-full sm:w-auto"
+                disabled={submitting}
+                className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 w-full sm:w-auto text-xs h-10 px-4"
               >
                 Revogar autorização
               </Button>
@@ -591,6 +721,18 @@ export const CadastroLiderPage: React.FC = () => {
           </div>
         )}
       </main>
+
+      {/* Modal de Recorte Quadrado */}
+      <ImageCropperModal
+        open={cropperOpen}
+        imageSrc={imagemParaRecorte}
+        originalFileName={nomeArquivoOriginal}
+        onClose={() => {
+          setCropperOpen(false)
+          setModoAtualizacaoFoto(false)
+        }}
+        onConfirm={handleConfirmarRecorte}
+      />
 
       {/* Rodapé simples com link de Privacidade */}
       <footer className="py-6 border-t border-neutral-200 text-center text-xs text-neutral-500 bg-white">

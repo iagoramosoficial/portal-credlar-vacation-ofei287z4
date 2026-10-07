@@ -35,6 +35,7 @@ export interface LiderItem {
   data_admissao?: string
   foto?: string
   status: LiderStatus
+  token_convite?: string
   convite_expira_em?: string
   termo_aceito?: string
   created: string

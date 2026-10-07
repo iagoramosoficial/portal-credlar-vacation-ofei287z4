@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { Trophy, ChevronRight, Sparkles } from 'lucide-react'
 import { adminService, HallPublicoItem } from '@/services/adminService'
+import { formatarFotoUrl } from '@/lib/conteudo-padrao'
 import pb from '@/lib/pocketbase/client'
 
 const CATEGORIA_LABELS: Record<string, string> = {
@@ -62,7 +63,7 @@ export const FaixaDestaqueHall: React.FC = () => {
         .trim()
     : ''
 
-  const fotoUrl = homenageado.foto_url || ''
+  const fotoUrl = formatarFotoUrl(homenageado.foto_url, pb.baseUrl)
 
   return (
     <div className="w-full bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border-y border-brand-gold/25 py-3.5 px-4 shadow-inner relative overflow-hidden transition-all duration-500">

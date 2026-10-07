@@ -16,7 +16,7 @@ import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { adminService, HallPublicoItem } from '@/services/adminService'
-import { getUrlPublica } from '@/lib/conteudo-padrao'
+import { getUrlPublica, formatarFotoUrl } from '@/lib/conteudo-padrao'
 import pb from '@/lib/pocketbase/client'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
 
@@ -218,7 +218,7 @@ export const HallDaFamaPage: React.FC = () => {
                   icon: Award,
                 }
                 const CatIcon = cat.icon
-                const fotoUrl = item.foto_url || ''
+                const fotoUrl = formatarFotoUrl(item.foto_url, pb.baseUrl)
 
                 return (
                   <article
@@ -352,7 +352,7 @@ export const HallDaFamaPage: React.FC = () => {
                       corBadge: 'bg-neutral-100 text-neutral-700 border-neutral-300',
                       icon: Award,
                     }
-                    const fotoUrl = item.foto_url || ''
+                    const fotoUrl = formatarFotoUrl(item.foto_url, pb.baseUrl)
 
                     return (
                       <div
