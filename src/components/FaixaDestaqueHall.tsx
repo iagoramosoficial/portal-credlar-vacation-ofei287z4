@@ -62,12 +62,7 @@ export const FaixaDestaqueHall: React.FC = () => {
         .trim()
     : ''
 
-  const fotoUrl = homenageado.foto
-    ? pb.files.getURL(
-        { collectionName: 'lideres', id: homenageado.id, foto: homenageado.foto } as any,
-        homenageado.foto,
-      )
-    : ''
+  const fotoUrl = homenageado.foto_url || ''
 
   return (
     <div className="w-full bg-gradient-to-r from-neutral-900 via-neutral-950 to-neutral-900 border-y border-brand-gold/25 py-3.5 px-4 shadow-inner relative overflow-hidden transition-all duration-500">

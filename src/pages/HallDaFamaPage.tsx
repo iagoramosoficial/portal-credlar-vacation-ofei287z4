@@ -218,12 +218,7 @@ export const HallDaFamaPage: React.FC = () => {
                   icon: Award,
                 }
                 const CatIcon = cat.icon
-                const fotoUrl = item.foto
-                  ? pb.files.getURL(
-                      { collectionName: 'lideres', id: item.id, foto: item.foto } as any,
-                      item.foto,
-                    )
-                  : ''
+                const fotoUrl = item.foto_url || ''
 
                 return (
                   <article
@@ -357,12 +352,7 @@ export const HallDaFamaPage: React.FC = () => {
                       corBadge: 'bg-neutral-100 text-neutral-700 border-neutral-300',
                       icon: Award,
                     }
-                    const fotoUrl = item.foto
-                      ? pb.files.getURL(
-                          { collectionName: 'lideres', id: item.id, foto: item.foto } as any,
-                          item.foto,
-                        )
-                      : ''
+                    const fotoUrl = item.foto_url || ''
 
                     return (
                       <div

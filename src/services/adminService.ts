@@ -102,6 +102,7 @@ export interface HallPublicoItem {
   nome: string
   area: string
   foto: string
+  foto_url?: string
   categoria: HallCategoria
   titulo: string
   motivo: string
