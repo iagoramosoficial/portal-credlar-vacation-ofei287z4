@@ -47,4 +47,5 @@ onRecordCreateRequest(
   'parametros',
   'termos',
   'lideres',
+  'hall_da_fama',
 )

@@ -52,6 +52,21 @@ routerAdd('POST', '/backend/v1/cadastro/{token}/revogar', (e) => {
       consRecord.set('origem', 'portal')
       consRecord.set('registrado_por', 'titular')
       txApp.save(consRecord)
+
+      // ETAPA 1E: Quando um líder for revogado, arquivar automaticamente as homenagens dele.
+      const homenagensDoLider = txApp.findRecordsByFilter(
+        'hall_da_fama',
+        "lider = '" + txLider.id + "' && status != 'arquivado'",
+        '',
+        100,
+        0,
+      )
+      for (let i = 0; i < homenagensDoLider.length; i++) {
+        const h = homenagensDoLider[i]
+        h.set('status', 'arquivado')
+        h.set('destaque_home', false)
+        txApp.save(h)
+      }
     })
   } catch (err) {
     console.log('Erro na transação de revogação pelo titular:', err)

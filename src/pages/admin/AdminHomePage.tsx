@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAdminAuth } from '@/contexts/AdminAuthContext'
 import {
@@ -10,18 +10,106 @@ import {
   ExternalLink,
   Shield,
   Clock,
+  Trophy,
+  Users,
+  AlertCircle,
+  Calendar,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { APP_TIMEZONE } from '@/lib/timezone'
+import { APP_TIMEZONE, formatarApenasData } from '@/lib/timezone'
+import { adminService, LiderItem } from '@/services/adminService'
+
+interface SugestaoAniversario {
+  lider: LiderItem
+  anos: number
+  dataAniversario: string
+  diasFaltando: number
+}
 
 export const AdminHomePage: React.FC = () => {
   const { usuario } = useAdminAuth()
+  const [sugestoes, setSugestoes] = useState<SugestaoAniversario[]>([])
+  const [loadingSugestoes, setLoadingSugestoes] = useState(true)
+
+  // Alerta no painel (tela Início) quando um líder autorizado completar 1, 3, 5 ou 10 anos de casa nos próximos 15 dias
+  useEffect(() => {
+    async function calcularAniversarios() {
+      try {
+        setLoadingSugestoes(true)
+        const lideres = await adminService.getLideres()
+        const autorizados = lideres.filter((l) => l.status === 'autorizado' && l.data_admissao)
+
+        // Calcular hoje no fuso configurado
+        const hoje = new Date()
+        const anoAtual = hoje.getFullYear()
+
+        const proximos: SugestaoAniversario[] = []
+
+        for (const lider of autorizados) {
+          if (!lider.data_admissao) continue
+          const dataAdm = new Date(lider.data_admissao)
+          if (isNaN(dataAdm.getTime())) continue
+
+          const anoAdm = dataAdm.getUTCFullYear()
+          const mesAdm = dataAdm.getUTCMonth()
+          const diaAdm = dataAdm.getUTCDate()
+
+          // Marcos: 1, 3, 5 ou 10 anos de casa
+          const marcos = [1, 3, 5, 10]
+
+          for (const m of marcos) {
+            const anoAlvo = anoAdm + m
+            // Data do aniversário de empresa
+            const dataMarco = new Date(anoAlvo, mesAdm, diaAdm)
+            const diffMs = dataMarco.getTime() - hoje.getTime()
+            const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24))
+
+            // Se for acontecer nos próximos 15 dias (0 a 15)
+            if (diffDias >= 0 && diffDias <= 15) {
+              proximos.push({
+                lider,
+                anos: m,
+                dataAniversario: dataMarco.toISOString(),
+                diasFaltando: diffDias,
+              })
+            }
+          }
+        }
+
+        setSugestoes(proximos)
+      } catch {
+        setSugestoes([])
+      } finally {
+        setLoadingSugestoes(false)
+      }
+    }
+
+    calcularAniversarios()
+  }, [])
 
   const atalhos = [
     {
+      titulo: 'Hall da Fama',
+      descricao:
+        'Crie homenagens públicas para líderes autorizados por tempo de casa, conquistas e destaque corporativo.',
+      path: '/admin/hall',
+      icon: Trophy,
+      color: 'from-amber-500/20 to-yellow-500/10 border-amber-500/30 text-brand-gold',
+      badge: 'Reconhecimento',
+    },
+    {
+      titulo: 'Líderes & Consentimento',
+      descricao:
+        'Cadastre novos líderes, envie links de autorização de uso de imagem e acompanhe o status de consentimento.',
+      path: '/admin/lideres',
+      icon: Users,
+      color: 'from-blue-500/20 to-cyan-500/10 border-blue-500/30 text-blue-400',
+      badge: 'LGPD & Time',
+    },
+    {
       titulo: 'Textos do Site',
       descricao:
-        'Altere os textos do topo, chamadas do Hero, rodapé e a faixa de aviso (com datas de vigência em horário de Brasília).',
+        'Altere os textos do topo, chamadas do Hero, rodapé e a faixa de aviso (com datas de vigência em horário oficial).',
       path: '/admin/site',
       icon: Globe,
       color: 'from-orange-500/20 to-amber-500/10 border-orange-500/30 text-brand-orange',
@@ -96,6 +184,59 @@ export const AdminHomePage: React.FC = () => {
           </span>
         </div>
       </div>
+
+      {/* Alerta de Tempo de Casa Sugerindo Homenagem */}
+      {sugestoes.length > 0 && (
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 md:p-6 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <Trophy className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-white flex items-center gap-2">
+                Sugestão de Homenagem por Tempo de Casa
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  {sugestoes.length} {sugestoes.length === 1 ? 'alerta' : 'alertas'}
+                </span>
+              </h2>
+              <p className="text-xs text-neutral-300 mt-1">
+                Líderes autorizados completando marcos de 1, 3, 5 ou 10 anos de casa nos próximos 15
+                dias. Você pode criar uma homenagem comemorativa no Hall da Fama.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {sugestoes.map((sug, idx) => {
+              const nome = sug.lider.nome_exibicao || sug.lider.nome
+              return (
+                <div
+                  key={idx}
+                  className="p-3.5 rounded-xl bg-neutral-900/80 border border-neutral-800 flex items-center justify-between gap-3 shadow-xs"
+                >
+                  <div className="min-w-0">
+                    <p className="font-bold text-xs text-white truncate">{nome}</p>
+                    <p className="text-[11px] text-amber-400 font-medium">
+                      {sug.anos} {sug.anos === 1 ? 'ano' : 'anos'} de casa em{' '}
+                      {sug.diasFaltando === 0 ? 'hoje' : `${sug.diasFaltando} dias`}
+                    </p>
+                    {sug.lider.area && (
+                      <p className="text-[10px] text-neutral-500 truncate">{sug.lider.area}</p>
+                    )}
+                  </div>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs h-8 px-2.5 shrink-0"
+                  >
+                    <Link to="/admin/hall">Criar Homenagem</Link>
+                  </Button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Grid de Atalhos para Telas */}
       <div>

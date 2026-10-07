@@ -17,8 +17,10 @@ import { AdminCardsPage } from '@/pages/admin/AdminCardsPage'
 import { AdminHistoricoPage } from '@/pages/admin/AdminHistoricoPage'
 import { AdminConfiguracoesPage } from '@/pages/admin/AdminConfiguracoesPage'
 import { AdminLideresPage } from '@/pages/admin/AdminLideresPage'
+import { AdminHallPage } from '@/pages/admin/AdminHallPage'
 import PrivacidadePage from './pages/PrivacidadePage'
 import CadastroLiderPage from './pages/CadastroLiderPage'
+import HallDaFamaPage from './pages/HallDaFamaPage'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -36,6 +38,7 @@ const App = () => (
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
               <Route path="/privacidade" element={<PrivacidadePage />} />
+              <Route path="/hall-da-fama" element={<HallDaFamaPage />} />
             </Route>
 
             {/* Rota Pública de Cadastro e Autorização de Imagem */}
@@ -45,15 +48,15 @@ const App = () => (
             <Route path="/admin/login" element={<AdminLoginPage />} />
 
             {/* Rotas Protegidas do Painel /admin */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<AdminHomePage />} />
-              <Route path="lideres" element={<AdminLideresPage />} />
-              <Route path="site" element={<AdminSitePage />} />
-              <Route path="cards" element={<AdminCardsPage />} />
-              <Route path="historico" element={<AdminHistoricoPage />} />
-              <Route path="configuracoes" element={<AdminConfiguracoesPage />} />
+            <Route element={<AdminLayout />}>
+              <Route path="/admin" element={<AdminHomePage />} />
+              <Route path="/admin/hall" element={<AdminHallPage />} />
+              <Route path="/admin/lideres" element={<AdminLideresPage />} />
+              <Route path="/admin/site" element={<AdminSitePage />} />
+              <Route path="/admin/cards" element={<AdminCardsPage />} />
+              <Route path="/admin/historico" element={<AdminHistoricoPage />} />
+              <Route path="/admin/configuracoes" element={<AdminConfiguracoesPage />} />
             </Route>
-
             <Route path="*" element={<NotFound />} />
           </Routes>
         </VersionProvider>

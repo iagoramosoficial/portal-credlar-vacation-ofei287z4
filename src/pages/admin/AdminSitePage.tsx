@@ -82,6 +82,8 @@ export const AdminSitePage: React.FC = () => {
         aviso_link: formData.aviso_link ? formData.aviso_link.trim() : '',
         aviso_inicio: dataInicioLocal ? dateStringToUtcIso(dataInicioLocal, false) : '',
         aviso_fim: dataFimLocal ? dateStringToUtcIso(dataFimLocal, true) : '',
+        hall_titulo: formData.hall_titulo || 'Hall da Fama',
+        hall_subtitulo: formData.hall_subtitulo || '',
       }
 
       const res = await adminService.updateConfiguracoes(configId, payload)
@@ -315,6 +317,49 @@ export const AdminSitePage: React.FC = () => {
                 onChange={(e) => setFormData((prev) => ({ ...prev, hero_frase: e.target.value }))}
                 required
                 placeholder="Ex: Seu veículo para a realização dos seus sonhos"
+                className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* Bloco: Hall da Fama */}
+        <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
+          <div className="pb-4 border-b border-neutral-800">
+            <h2 className="text-base font-bold text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-brand-gold" />
+              Página Pública do Hall da Fama
+            </h2>
+            <p className="text-xs text-neutral-400 mt-0.5">
+              Título e subtítulo institucional exibidos no topo da página /hall-da-fama.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="hall_titulo" className="text-xs font-medium text-neutral-300">
+                Título da Página
+              </Label>
+              <Input
+                id="hall_titulo"
+                value={formData.hall_titulo || ''}
+                onChange={(e) => setFormData((prev) => ({ ...prev, hall_titulo: e.target.value }))}
+                placeholder="Ex: Hall da Fama"
+                className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="hall_subtitulo" className="text-xs font-medium text-neutral-300">
+                Subtítulo / Descrição
+              </Label>
+              <Input
+                id="hall_subtitulo"
+                value={formData.hall_subtitulo || ''}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, hall_subtitulo: e.target.value }))
+                }
+                placeholder="Ex: Celebrando aqueles que constroem nossa história..."
                 className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
               />
             </div>

@@ -75,6 +75,50 @@ export interface CliqueItem {
   updated: string
 }
 
+export type HallCategoria = 'destaque' | 'tempo_de_casa' | 'reconhecimento' | 'boas_vindas'
+export type HallStatus = 'rascunho' | 'publicado' | 'arquivado'
+
+export interface HallItem {
+  id: string
+  lider: string
+  categoria: HallCategoria
+  titulo?: string
+  motivo: string
+  periodo?: string
+  publicar_em?: string
+  expira_em?: string
+  status: HallStatus
+  destaque_home: boolean
+  created: string
+  updated: string
+  // Relação expandida do líder (quando carregado no admin com expand)
+  expand?: {
+    lider?: LiderItem
+  }
+}
+
+export interface HallPublicoItem {
+  id: string
+  nome: string
+  area: string
+  foto: string
+  categoria: HallCategoria
+  titulo: string
+  motivo: string
+  periodo: string
+  destaque_home: boolean
+  publicar_em: string
+  expira_em: string
+}
+
+export interface HallArquivoPaginado {
+  items: HallPublicoItem[]
+  totalItems: number
+  page: number
+  perPage: number
+  totalPages: number
+}
+
 export const adminService = {
   // Configurações do site
   async getConfiguracoes(): Promise<ConfiguracoesSite & { id: string }> {
@@ -236,5 +280,82 @@ export const adminService = {
       sort: '-created',
     })
     return list
+  },
+
+  // Hall da Fama (Admin)
+  async getHallItems(): Promise<HallItem[]> {
+    const list = await pb.collection('hall_da_fama').getFullList<HallItem>({
+      sort: '-created',
+      expand: 'lider',
+    })
+    return list
+  },
+
+  async createHallItem(data: {
+    lider: string
+    categoria: HallCategoria
+    titulo?: string
+    motivo: string
+    periodo?: string
+    publicar_em?: string
+    expira_em?: string
+    status: HallStatus
+    destaque_home?: boolean
+  }): Promise<HallItem> {
+    const created = await pb.collection('hall_da_fama').create<HallItem>(data, {
+      expand: 'lider',
+    })
+    return created
+  },
+
+  async updateHallItem(
+    id: string,
+    data: Partial<{
+      lider: string
+      categoria: HallCategoria
+      titulo: string
+      motivo: string
+      periodo: string
+      publicar_em: string
+      expira_em: string
+      status: HallStatus
+      destaque_home: boolean
+    }>,
+  ): Promise<HallItem> {
+    const updated = await pb.collection('hall_da_fama').update<HallItem>(id, data, {
+      expand: 'lider',
+    })
+    return updated
+  },
+
+  async deleteHallItem(id: string): Promise<boolean> {
+    await pb.collection('hall_da_fama').delete(id)
+    return true
+  },
+
+  // Hall da Fama (Público)
+  async getHallPublico(): Promise<HallPublicoItem[]> {
+    try {
+      const res = await pb.send<HallPublicoItem[]>('/backend/v1/hall', {
+        method: 'GET',
+      })
+      return res || []
+    } catch {
+      return []
+    }
+  },
+
+  async getHallArquivo(page: number = 1, perPage: number = 12): Promise<HallArquivoPaginado> {
+    try {
+      const res = await pb.send<HallArquivoPaginado>(
+        `/backend/v1/hall/arquivo?page=${page}&perPage=${perPage}`,
+        {
+          method: 'GET',
+        },
+      )
+      return res || { items: [], totalItems: 0, page, perPage, totalPages: 0 }
+    } catch {
+      return { items: [], totalItems: 0, page, perPage, totalPages: 0 }
+    }
   },
 }

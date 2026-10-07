@@ -118,6 +118,10 @@ export function FeatureGrid({ cards = CARDS_PADRAO }: FeatureGridProps) {
                     >
                       {isDisabled ? (
                         <span>{card.texto_botao}</span>
+                      ) : href.startsWith('/') ? (
+                        <a href={href} onClick={() => handleCardClick(card)}>
+                          {card.texto_botao}
+                        </a>
                       ) : (
                         <a
                           href={href}

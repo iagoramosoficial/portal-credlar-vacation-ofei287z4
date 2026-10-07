@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T02:44:45.853Z",
+  "generatedAt": "2026-10-07T22:52:41.017Z",
   "collections": [
     {
       "name": "users",
@@ -228,6 +228,18 @@
         {
           "name": "url_publica",
           "type": "url",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hall_titulo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "hall_subtitulo",
+          "type": "text",
           "required": false,
           "system": false
         }
@@ -749,6 +761,94 @@
         }
       ],
       "indexes": ["CREATE INDEX idx_consentimentos_lider ON consentimentos (lider, created DESC)"]
+    },
+    {
+      "name": "hall_da_fama",
+      "type": "base",
+      "apiRules": {
+        "list": "@request.auth.collectionName = \"usuarios_admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\"",
+        "create": "@request.auth.collectionName = \"usuarios_admin\"",
+        "update": "@request.auth.collectionName = \"usuarios_admin\"",
+        "delete": "@request.auth.collectionName = \"usuarios_admin\""
+      },
+      "fields": [
+        {
+          "name": "lider",
+          "type": "relation",
+          "required": true,
+          "system": false,
+          "collectionRef": "lideres"
+        },
+        {
+          "name": "categoria",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["destaque", "tempo_de_casa", "reconhecimento", "boas_vindas"]
+        },
+        {
+          "name": "titulo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "motivo",
+          "type": "text",
+          "required": true,
+          "system": false
+        },
+        {
+          "name": "periodo",
+          "type": "text",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "publicar_em",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "expira_em",
+          "type": "date",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "status",
+          "type": "select",
+          "required": true,
+          "system": false,
+          "selectValues": ["rascunho", "publicado", "arquivado"]
+        },
+        {
+          "name": "destaque_home",
+          "type": "bool",
+          "required": false,
+          "system": false
+        },
+        {
+          "name": "created",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate"]
+        },
+        {
+          "name": "updated",
+          "type": "autodate",
+          "required": false,
+          "system": false,
+          "autodateTriggers": ["onCreate", "onUpdate"]
+        }
+      ],
+      "indexes": [
+        "CREATE INDEX idx_hall_status_vigencia ON hall_da_fama (status, publicar_em, expira_em)",
+        "CREATE INDEX idx_hall_lider ON hall_da_fama (lider)"
+      ]
     }
   ]
 }

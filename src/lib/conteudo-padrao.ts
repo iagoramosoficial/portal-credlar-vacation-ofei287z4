@@ -29,6 +29,9 @@ export interface ConfiguracoesSite {
   // Etapa 1D
   mensagem_convite?: string
   url_publica?: string
+  // Etapa 1E
+  hall_titulo?: string
+  hall_subtitulo?: string
 }
 
 /**
@@ -93,6 +96,8 @@ export const CONFIGURACOES_PADRAO: ConfiguracoesSite = {
   mensagem_convite:
     'Olá, {nome}! Você foi convidado(a) para o Hall da Fama da UniCredlar. Para completar seu cadastro e autorizar o uso da sua foto, acesse: {link} (válido até {validade}).',
   url_publica: '',
+  hall_titulo: 'Hall da Fama',
+  hall_subtitulo: '',
   ...CORES_PADRAO_HEX,
 }
 
@@ -163,11 +168,11 @@ export const CARDS_PADRAO: CardHome[] = [
     descricao:
       'Reconhecimento àqueles que estão construindo um legado de excelência e resultados incríveis na Credlar.',
     icone: 'Trophy',
-    selo_texto: 'Em Breve',
-    selo_estilo: 'gradiente',
-    texto_botao: 'Aguarde',
-    link: '#',
-    clicavel: false,
+    selo_texto: '',
+    selo_estilo: '',
+    texto_botao: 'Ver Homenagens',
+    link: '/hall-da-fama',
+    clicavel: true,
     cor_icone: 'dourado',
     ordem: 5,
     status: 'publicado',

@@ -14,6 +14,7 @@ import {
   Shield,
   MousePointerClick,
   Sliders,
+  Trophy,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useState } from 'react'
@@ -157,6 +158,7 @@ export const AdminLayout: React.FC = () => {
 
   const navItems: Array<{ label: string; path: string; icon: React.ElementType }> = [
     { label: 'Início', path: '/admin', icon: LayoutDashboard },
+    { label: 'Hall da Fama', path: '/admin/hall', icon: Trophy },
     { label: 'Líderes', path: '/admin/lideres', icon: Users },
     { label: 'Textos do Site', path: '/admin/site', icon: Globe },
     { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
