@@ -87,6 +87,8 @@ export const AdminHomePage: React.FC = () => {
     calcularAniversarios()
   }, [])
 
+  const isAdmin = usuario?.papel === 'admin'
+
   const atalhos = [
     {
       titulo: 'Hall da Fama',
@@ -108,31 +110,45 @@ export const AdminHomePage: React.FC = () => {
     },
     {
       titulo: 'Textos do Site',
-      descricao:
-        'Altere os textos do topo, chamadas do Hero, rodapé e a faixa de aviso (com datas de vigência em horário oficial).',
+      descricao: isAdmin
+        ? 'Altere os textos do topo, chamadas do Hero, rodapé e a faixa de aviso (com datas de vigência em horário oficial).'
+        : 'Gerencie a faixa de aviso superior e os links curtos do portal.',
       path: '/admin/site',
       icon: Globe,
       color: 'from-orange-500/20 to-amber-500/10 border-orange-500/30 text-brand-orange',
       badge: 'Geral',
     },
     {
-      titulo: 'Cards da Home',
+      titulo: 'Agenda de Eventos',
       descricao:
-        'Gerencie a vitrine de cards da página inicial: crie, edite textos, ícones, botões, ordene e alterne entre rascunho ou publicado.',
-      path: '/admin/cards',
-      icon: Layers,
-      color: 'from-brand-red/20 to-orange-500/10 border-brand-red/30 text-brand-red',
-      badge: 'Conteúdo',
+        'Cadastre e organize encontros, workshops, mentorias e eventos institucionais no calendário oficial.',
+      path: '/admin/agenda',
+      icon: Calendar,
+      color: 'from-teal-500/20 to-emerald-500/10 border-teal-500/30 text-teal-400',
+      badge: 'Eventos',
     },
-    {
-      titulo: 'Histórico de Alterações',
-      descricao:
-        'Consulte todas as modificações feitas pela equipe, veja o que mudou antes e depois e exporte para planilha.',
-      path: '/admin/historico',
-      icon: History,
-      color: 'from-purple-500/20 to-brand-lilac/10 border-purple-500/30 text-brand-lilac',
-      badge: 'Auditoria',
-    },
+    ...(isAdmin
+      ? [
+          {
+            titulo: 'Cards da Home',
+            descricao:
+              'Gerencie a vitrine de cards da página inicial: crie, edite textos, ícones, botões, ordene e alterne entre rascunho ou publicado.',
+            path: '/admin/cards',
+            icon: Layers,
+            color: 'from-brand-red/20 to-orange-500/10 border-brand-red/30 text-brand-red',
+            badge: 'Conteúdo',
+          },
+          {
+            titulo: 'Histórico de Alterações',
+            descricao:
+              'Consulte todas as modificações feitas pela equipe, veja o que mudou antes e depois e exporte para planilha.',
+            path: '/admin/historico',
+            icon: History,
+            color: 'from-purple-500/20 to-brand-lilac/10 border-purple-500/30 text-brand-lilac',
+            badge: 'Auditoria',
+          },
+        ]
+      : []),
   ]
 
   return (
@@ -227,9 +243,20 @@ export const AdminHomePage: React.FC = () => {
                   <Button
                     asChild
                     size="sm"
-                    className="bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs h-8 px-2.5 shrink-0"
+                    className="bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs h-8 px-2.5 shrink-0 cursor-pointer"
                   >
-                    <Link to="/admin/hall">Criar Homenagem</Link>
+                    <Link
+                      to="/admin/hall"
+                      state={{
+                        preencherHomenagem: {
+                          liderId: sug.lider.id,
+                          anos: sug.anos,
+                          dataAniversario: sug.dataAniversario,
+                        },
+                      }}
+                    >
+                      Criar Homenagem
+                    </Link>
                   </Button>
                 </div>
               )

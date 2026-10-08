@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   Trophy,
   Plus,
@@ -50,7 +50,7 @@ import {
 import { useAdminAuth } from '@/contexts/AdminAuthContext'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
 import { useToast } from '@/hooks/use-toast'
-import { getUrlPublica } from '@/lib/conteudo-padrao'
+import { getUrlPublica, formatarFotoUrl } from '@/lib/conteudo-padrao'
 import { exportarParaCsv } from '@/lib/export-csv'
 import {
   formatarDataHora,
@@ -90,6 +90,7 @@ export const AdminHallPage: React.FC = () => {
   const { usuario } = useAdminAuth()
   const { config } = useConteudoSite()
   const { toast } = useToast()
+  const location = useLocation()
 
   const [homenagens, setHomenagens] = useState<HallItem[]>([])
   const [lideresAutorizados, setLideresAutorizados] = useState<LiderItem[]>([])
@@ -120,9 +121,11 @@ export const AdminHallPage: React.FC = () => {
   // Modal Pré-visualização
   const [modalPreviewOpen, setModalPreviewOpen] = useState(false)
   const [previewItem, setPreviewItem] = useState<{
+    id?: string
     nome: string
     area?: string
     foto?: string
+    foto_url?: string
     categoria: HallCategoria
     titulo?: string
     motivo: string
@@ -167,6 +170,62 @@ export const AdminHallPage: React.FC = () => {
   useEffect(() => {
     carregarDados()
   }, [])
+
+  // Verificar se veio com estado de pré-preenchimento vindo do alerta de Tempo de Casa (tela Início)
+  useEffect(() => {
+    if (loading || lideresAutorizados.length === 0) return
+
+    const navState = location.state as {
+      preencherHomenagem?: {
+        liderId: string
+        anos: number
+        dataAniversario: string
+      }
+    } | null
+
+    if (navState?.preencherHomenagem) {
+      const { liderId, anos, dataAniversario } = navState.preencherHomenagem
+
+      // Verificar se o líder está autorizado
+      const liderExiste = lideresAutorizados.find((l) => l.id === liderId)
+      if (liderExiste) {
+        setEditandoItem(null)
+        setFormLiderId(liderId)
+        setFormCategoria('tempo_de_casa')
+        setFormTitulo(`${anos} ${anos === 1 ? 'ano' : 'anos'} de casa`)
+        setFormMotivo('') // Campo motivo fica vazio para a especialista escrever
+
+        // Período = mês e ano da data do aniversário de casa (ex.: "Outubro/2026")
+        const dtAniv = new Date(dataAniversario)
+        let mesAno = ''
+        if (!isNaN(dtAniv.getTime())) {
+          const raw = dtAniv.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+          mesAno = raw.charAt(0).toUpperCase() + raw.slice(1)
+        } else {
+          const raw = new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+          mesAno = raw.charAt(0).toUpperCase() + raw.slice(1)
+        }
+        setFormPeriodo(mesAno)
+
+        // publicar_em = data do aniversário de casa no ano corrente (YYYY-MM-DD)
+        const dtPub = !isNaN(dtAniv.getTime()) ? dtAniv : new Date()
+        const pubYmd = dtPub.toISOString().split('T')[0]
+        setFormPublicarEm(pubYmd)
+
+        // expira_em = publicar_em + parametros.dias_validade_homenagem
+        const diasValidade = parametros?.dias_validade_homenagem || 30
+        const dtExp = new Date(dtPub.getTime() + diasValidade * 24 * 60 * 60 * 1000)
+        setFormExpiraEm(dtExp.toISOString().split('T')[0])
+
+        setFormStatus('rascunho')
+        setFormDestaqueHome(false)
+        setModalFormOpen(true)
+
+        // Limpar state do history para evitar reabrir caso feche e navegue
+        window.history.replaceState({}, document.title)
+      }
+    }
+  }, [loading, lideresAutorizados, parametros, location.state])
 
   // Filtragem da lista
   const homenagensFiltradas = useMemo(() => {
@@ -244,10 +303,19 @@ export const AdminHallPage: React.FC = () => {
 
     const liderObj =
       lideresAutorizados.find((l) => l.id === formLiderId) || editandoItem?.expand?.lider
+
+    // Montar foto_url a partir do registro do líder dono da foto (mesma lógica do servidor e da página pública)
+    let fotoUrlPreview = ''
+    if (liderObj && liderObj.foto) {
+      fotoUrlPreview = pb.files.getURL(liderObj as any, liderObj.foto)
+    }
+
     setPreviewItem({
+      id: editandoItem?.id,
       nome: liderObj?.nome_exibicao || liderObj?.nome || 'Líder Homenageado',
       area: liderObj?.area,
       foto: liderObj?.foto,
+      foto_url: fotoUrlPreview,
       categoria: formCategoria,
       titulo: formTitulo.trim() || undefined,
       motivo: formMotivo.trim(),
@@ -991,11 +1059,27 @@ export const AdminHallPage: React.FC = () => {
           {previewItem && (
             <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200 p-6 text-neutral-900 space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-gold via-amber-400 to-yellow-200 p-[2px] shadow">
-                  <div className="w-full h-full rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400 font-bold">
-                    <Trophy className="w-8 h-8 text-brand-gold" />
-                  </div>
+                <div className="relative shrink-0">
+                  {previewItem.foto_url ? (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl p-[2px] bg-gradient-to-tr from-brand-gold via-amber-400 to-yellow-200 shadow-md">
+                      <img
+                        src={formatarFotoUrl(previewItem.foto_url, pb.baseUrl)}
+                        alt={previewItem.nome}
+                        className="w-full h-full object-cover rounded-xl bg-neutral-100"
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-brand-gold via-amber-400 to-yellow-200 p-[2px] shadow">
+                      <div className="w-full h-full rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-400 font-bold">
+                        <Trophy className="w-8 h-8 text-brand-gold/60" />
+                      </div>
+                    </div>
+                  )}
+                  <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-gold text-neutral-950 font-bold text-[10px] shadow">
+                    ★
+                  </span>
                 </div>
+
                 <div className="min-w-0 flex-1">
                   <span className="inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-gold/15 text-brand-gold border border-brand-gold/30 mb-1">
                     {CATEGORIAS_CONFIG[previewItem.categoria]?.label || previewItem.categoria}

@@ -20,8 +20,11 @@ import {
   FileText,
 } from 'lucide-react'
 import { AbaLinksCurtos } from './AbaLinksCurtos'
+import { useAdminAuth } from '@/contexts/AdminAuthContext'
 
 export const AdminSitePage: React.FC = () => {
+  const { usuario } = useAdminAuth()
+  const isAdmin = usuario?.papel === 'admin'
   const [abaAtiva, setAbaAtiva] = useState<'textos' | 'links'>('textos')
   const [configId, setConfigId] = useState<string>('')
   const [formData, setFormData] = useState<ConfiguracoesSite>(CONFIGURACOES_PADRAO)
@@ -79,24 +82,33 @@ export const AdminSitePage: React.FC = () => {
       setSalvando(true)
       setSucessoSalvar(false)
 
-      // Converter inputs no fuso de Brasília para UTC ISO para salvar no banco
-      const payload: Partial<ConfiguracoesSite> = {
-        nome_empresa: formData.nome_empresa,
-        hero_linha_1: formData.hero_linha_1,
-        hero_destaque: formData.hero_destaque,
-        hero_frase: formData.hero_frase,
-        rodape_parceria: formData.rodape_parceria,
-        rodape_metodologia: formData.rodape_metodologia,
-        rodape_frase_1: formData.rodape_frase_1,
-        rodape_frase_2: formData.rodape_frase_2,
-        aviso_ativo: !!formData.aviso_ativo,
-        aviso_texto: formData.aviso_texto || '',
-        aviso_link: formData.aviso_link ? formData.aviso_link.trim() : '',
-        aviso_inicio: dataInicioLocal ? dateStringToUtcIso(dataInicioLocal, false) : '',
-        aviso_fim: dataFimLocal ? dateStringToUtcIso(dataFimLocal, true) : '',
-        hall_titulo: formData.hall_titulo || 'Hall da Fama',
-        hall_subtitulo: formData.hall_subtitulo || '',
-      }
+      // Se for admin, envia todos os campos editáveis da tela.
+      // Se for DHO, envia ESTRITAMENTE os campos da faixa de aviso, conforme a regra de API rule.
+      const payload: Partial<ConfiguracoesSite> = isAdmin
+        ? {
+            nome_empresa: formData.nome_empresa,
+            hero_linha_1: formData.hero_linha_1,
+            hero_destaque: formData.hero_destaque,
+            hero_frase: formData.hero_frase,
+            rodape_parceria: formData.rodape_parceria,
+            rodape_metodologia: formData.rodape_metodologia,
+            rodape_frase_1: formData.rodape_frase_1,
+            rodape_frase_2: formData.rodape_frase_2,
+            aviso_ativo: !!formData.aviso_ativo,
+            aviso_texto: formData.aviso_texto || '',
+            aviso_link: formData.aviso_link ? formData.aviso_link.trim() : '',
+            aviso_inicio: dataInicioLocal ? dateStringToUtcIso(dataInicioLocal, false) : '',
+            aviso_fim: dataFimLocal ? dateStringToUtcIso(dataFimLocal, true) : '',
+            hall_titulo: formData.hall_titulo || 'Hall da Fama',
+            hall_subtitulo: formData.hall_subtitulo || '',
+          }
+        : {
+            aviso_ativo: !!formData.aviso_ativo,
+            aviso_texto: formData.aviso_texto || '',
+            aviso_link: formData.aviso_link ? formData.aviso_link.trim() : '',
+            aviso_inicio: dataInicioLocal ? dateStringToUtcIso(dataInicioLocal, false) : '',
+            aviso_fim: dataFimLocal ? dateStringToUtcIso(dataFimLocal, true) : '',
+          }
 
       const res = await adminService.updateConfiguracoes(configId, payload)
       setFormData(res)
@@ -343,203 +355,223 @@ export const AdminSitePage: React.FC = () => {
             </div>
           </section>
 
-          {/* Bloco 2: Seção Hero (Topo da Página) */}
-          <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
-            <div className="pb-4 border-b border-neutral-800">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand-yellow" />
-                Topo da Página (Seção Hero)
-              </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Título e frase principal de boas-vindas na abertura do site.
-              </p>
-            </div>
+          {/* Seção Hero, Hall e Rodapé: exibidos APENAS para papel admin. Ocultos para papel dho */}
+          {isAdmin && (
+            <>
+              {/* Bloco 2: Seção Hero (Topo da Página) */}
+              <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
+                <div className="pb-4 border-b border-neutral-800">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-brand-yellow" />
+                    Topo da Página (Seção Hero)
+                  </h2>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    Título e frase principal de boas-vindas na abertura do site.
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="md:col-span-2 space-y-1.5">
-                <Label htmlFor="nome_empresa" className="text-xs font-medium text-neutral-300">
-                  Nome da Empresa / Portal
-                </Label>
-                <Input
-                  id="nome_empresa"
-                  value={formData.nome_empresa || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, nome_empresa: e.target.value }))
-                  }
-                  required
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="md:col-span-2 space-y-1.5">
+                    <Label htmlFor="nome_empresa" className="text-xs font-medium text-neutral-300">
+                      Nome da Empresa / Portal
+                    </Label>
+                    <Input
+                      id="nome_empresa"
+                      value={formData.nome_empresa || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, nome_empresa: e.target.value }))
+                      }
+                      required
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="hero_linha_1" className="text-xs font-medium text-neutral-300">
-                  Hero - Linha 1 (Texto Superior)
-                </Label>
-                <Input
-                  id="hero_linha_1"
-                  value={formData.hero_linha_1 || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, hero_linha_1: e.target.value }))
-                  }
-                  required
-                  placeholder="Ex: Bem-vindo ao"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="hero_linha_1" className="text-xs font-medium text-neutral-300">
+                      Hero - Linha 1 (Texto Superior)
+                    </Label>
+                    <Input
+                      id="hero_linha_1"
+                      value={formData.hero_linha_1 || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, hero_linha_1: e.target.value }))
+                      }
+                      required
+                      placeholder="Ex: Bem-vindo ao"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="hero_destaque" className="text-xs font-medium text-neutral-300">
-                  Hero - Título em Destaque (Gradiente da Marca)
-                </Label>
-                <Input
-                  id="hero_destaque"
-                  value={formData.hero_destaque || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, hero_destaque: e.target.value }))
-                  }
-                  required
-                  placeholder="Ex: Ecossistema Credlar"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="hero_destaque" className="text-xs font-medium text-neutral-300">
+                      Hero - Título em Destaque (Gradiente da Marca)
+                    </Label>
+                    <Input
+                      id="hero_destaque"
+                      value={formData.hero_destaque || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, hero_destaque: e.target.value }))
+                      }
+                      required
+                      placeholder="Ex: Ecossistema Credlar"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="md:col-span-2 space-y-1.5">
-                <Label htmlFor="hero_frase" className="text-xs font-medium text-neutral-300">
-                  Hero - Frase de Impacto (Cursiva / Subtítulo)
-                </Label>
-                <Input
-                  id="hero_frase"
-                  value={formData.hero_frase || ''}
-                  onChange={(e) => setFormData((prev) => ({ ...prev, hero_frase: e.target.value }))}
-                  required
-                  placeholder="Ex: Seu veículo para a realização dos seus sonhos"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
-            </div>
-          </section>
+                  <div className="md:col-span-2 space-y-1.5">
+                    <Label htmlFor="hero_frase" className="text-xs font-medium text-neutral-300">
+                      Hero - Frase de Impacto (Cursiva / Subtítulo)
+                    </Label>
+                    <Input
+                      id="hero_frase"
+                      value={formData.hero_frase || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, hero_frase: e.target.value }))
+                      }
+                      required
+                      placeholder="Ex: Seu veículo para a realização dos seus sonhos"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
+                </div>
+              </section>
 
-          {/* Bloco: Hall da Fama */}
-          <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
-            <div className="pb-4 border-b border-neutral-800">
-              <h2 className="text-base font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand-gold" />
-                Página Pública do Hall da Fama
-              </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Título e subtítulo institucional exibidos no topo da página /hall-da-fama.
-              </p>
-            </div>
+              {/* Bloco: Hall da Fama */}
+              <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
+                <div className="pb-4 border-b border-neutral-800">
+                  <h2 className="text-base font-bold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-brand-gold" />
+                    Página Pública do Hall da Fama
+                  </h2>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    Título e subtítulo institucional exibidos no topo da página /hall-da-fama.
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <Label htmlFor="hall_titulo" className="text-xs font-medium text-neutral-300">
-                  Título da Página
-                </Label>
-                <Input
-                  id="hall_titulo"
-                  value={formData.hall_titulo || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, hall_titulo: e.target.value }))
-                  }
-                  placeholder="Ex: Hall da Fama"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="hall_titulo" className="text-xs font-medium text-neutral-300">
+                      Título da Página
+                    </Label>
+                    <Input
+                      id="hall_titulo"
+                      value={formData.hall_titulo || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, hall_titulo: e.target.value }))
+                      }
+                      placeholder="Ex: Hall da Fama"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="hall_subtitulo" className="text-xs font-medium text-neutral-300">
-                  Subtítulo / Descrição
-                </Label>
-                <Input
-                  id="hall_subtitulo"
-                  value={formData.hall_subtitulo || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, hall_subtitulo: e.target.value }))
-                  }
-                  placeholder="Ex: Celebrando aqueles que constroem nossa história..."
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
-            </div>
-          </section>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="hall_subtitulo"
+                      className="text-xs font-medium text-neutral-300"
+                    >
+                      Subtítulo / Descrição
+                    </Label>
+                    <Input
+                      id="hall_subtitulo"
+                      value={formData.hall_subtitulo || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, hall_subtitulo: e.target.value }))
+                      }
+                      placeholder="Ex: Celebrando aqueles que constroem nossa história..."
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
+                </div>
+              </section>
 
-          {/* Bloco 3: Seção Rodapé */}
-          <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
-            <div className="pb-4 border-b border-neutral-800">
-              <h2 className="text-base font-bold text-white">Rodapé do Site</h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
-                Frases institucionais, parcerias e metodologias exibidas na base de todas as telas.
-              </p>
-            </div>
+              {/* Bloco 3: Seção Rodapé */}
+              <section className="bg-neutral-900/70 border border-neutral-800 rounded-2xl p-6 space-y-6">
+                <div className="pb-4 border-b border-neutral-800">
+                  <h2 className="text-base font-bold text-white">Rodapé do Site</h2>
+                  <p className="text-xs text-neutral-400 mt-0.5">
+                    Frases institucionais, parcerias e metodologias exibidas na base de todas as
+                    telas.
+                  </p>
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="space-y-1.5">
-                <Label htmlFor="rodape_parceria" className="text-xs font-medium text-neutral-300">
-                  Rodapé - Linha de Parceria
-                </Label>
-                <Input
-                  id="rodape_parceria"
-                  value={formData.rodape_parceria || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, rodape_parceria: e.target.value }))
-                  }
-                  required
-                  placeholder="Ex: Em parceria estratégica com XDreams Advisory"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="rodape_parceria"
+                      className="text-xs font-medium text-neutral-300"
+                    >
+                      Rodapé - Linha de Parceria
+                    </Label>
+                    <Input
+                      id="rodape_parceria"
+                      value={formData.rodape_parceria || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, rodape_parceria: e.target.value }))
+                      }
+                      required
+                      placeholder="Ex: Em parceria estratégica com XDreams Advisory"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="rodape_metodologia"
-                  className="text-xs font-medium text-neutral-300"
-                >
-                  Rodapé - Metodologia
-                </Label>
-                <Input
-                  id="rodape_metodologia"
-                  value={formData.rodape_metodologia || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, rodape_metodologia: e.target.value }))
-                  }
-                  required
-                  placeholder="Ex: Governança e Metodologia LPP"
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="rodape_metodologia"
+                      className="text-xs font-medium text-neutral-300"
+                    >
+                      Rodapé - Metodologia
+                    </Label>
+                    <Input
+                      id="rodape_metodologia"
+                      value={formData.rodape_metodologia || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, rodape_metodologia: e.target.value }))
+                      }
+                      required
+                      placeholder="Ex: Governança e Metodologia LPP"
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="rodape_frase_1" className="text-xs font-medium text-neutral-300">
-                  Rodapé - Frase 1 (Texto Principal)
-                </Label>
-                <Input
-                  id="rodape_frase_1"
-                  value={formData.rodape_frase_1 || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, rodape_frase_1: e.target.value }))
-                  }
-                  required
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="rodape_frase_1"
+                      className="text-xs font-medium text-neutral-300"
+                    >
+                      Rodapé - Frase 1 (Texto Principal)
+                    </Label>
+                    <Input
+                      id="rodape_frase_1"
+                      value={formData.rodape_frase_1 || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, rodape_frase_1: e.target.value }))
+                      }
+                      required
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="rodape_frase_2" className="text-xs font-medium text-neutral-300">
-                  Rodapé - Frase 2 (Texto em Destaque)
-                </Label>
-                <Input
-                  id="rodape_frase_2"
-                  value={formData.rodape_frase_2 || ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, rodape_frase_2: e.target.value }))
-                  }
-                  required
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
-              </div>
-            </div>
-          </section>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="rodape_frase_2"
+                      className="text-xs font-medium text-neutral-300"
+                    >
+                      Rodapé - Frase 2 (Texto em Destaque)
+                    </Label>
+                    <Input
+                      id="rodape_frase_2"
+                      value={formData.rodape_frase_2 || ''}
+                      onChange={(e) =>
+                        setFormData((prev) => ({ ...prev, rodape_frase_2: e.target.value }))
+                      }
+                      required
+                      className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
+                    />
+                  </div>
+                </div>
+              </section>
+            </>
+          )}
 
           {/* Barra de Ação Flutuante / Final com Único Botão Salvar */}
           <div className="sticky bottom-4 z-30 p-4 rounded-xl bg-neutral-950/90 border border-neutral-800 shadow-2xl backdrop-blur flex items-center justify-between gap-4">

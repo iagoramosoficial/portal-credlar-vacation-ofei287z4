@@ -140,6 +140,28 @@ export const AdminLayout: React.FC = () => {
     }
   }, [])
 
+  const isAdmin = usuario?.papel === 'admin'
+
+  // Rotas restritas para quem não é admin (ex: dho)
+  // Quem acessar por URL uma tela sem permissão é redirecionado para /admin com aviso discreto.
+  useEffect(() => {
+    if (!isAuthenticated || !usuario) return
+
+    const rotasExclusivasAdmin = ['/admin/cards', '/admin/configuracoes', '/admin/historico']
+
+    const rotaAtual = location.pathname
+    const ehRotaRestrita = rotasExclusivasAdmin.some(
+      (rota) => rotaAtual === rota || rotaAtual.startsWith(`${rota}/`),
+    )
+
+    if (!isAdmin && ehRotaRestrita) {
+      toast({
+        title: 'Acesso restrito',
+        description: 'Esta área é exclusiva para administradores.',
+      })
+    }
+  }, [location.pathname, isAdmin, isAuthenticated, usuario, toast])
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center text-white">
@@ -155,19 +177,35 @@ export const AdminLayout: React.FC = () => {
     return <Navigate to="/admin/login" state={{ from: location }} replace />
   }
 
-  const isAdmin = usuario?.papel === 'admin'
+  // Se for não-admin em rota exclusiva, redireciona para /admin
+  const rotasExclusivasAdmin = ['/admin/cards', '/admin/configuracoes', '/admin/historico']
+  const ehRotaRestrita =
+    !isAdmin &&
+    rotasExclusivasAdmin.some(
+      (rota) => location.pathname === rota || location.pathname.startsWith(`${rota}/`),
+    )
 
+  if (ehRotaRestrita) {
+    return <Navigate to="/admin" replace />
+  }
+
+  // Itens de navegação:
+  // Papel DHO: Início, Agenda de Eventos, Hall da Fama, Líderes, Textos do Site e Links curtos.
+  // Remover Cards da Home, Histórico de Alterações, Cliques & Telemetria e Configurações.
+  // Papel Admin: Vê tudo.
   const navItems: Array<{ label: string; path: string; icon: React.ElementType }> = [
     { label: 'Início', path: '/admin', icon: LayoutDashboard },
     { label: 'Agenda de Eventos', path: '/admin/agenda', icon: Calendar },
     { label: 'Hall da Fama', path: '/admin/hall', icon: Trophy },
     { label: 'Líderes', path: '/admin/lideres', icon: Users },
-    { label: 'Textos & Links', path: '/admin/site', icon: Globe },
-    { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
+    { label: isAdmin ? 'Textos & Links' : 'Textos do Site', path: '/admin/site', icon: Globe },
     ...(isAdmin
-      ? [{ label: 'Marca & Configurações', path: '/admin/configuracoes', icon: Sliders }]
+      ? [
+          { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
+          { label: 'Marca & Configurações', path: '/admin/configuracoes', icon: Sliders },
+          { label: 'Histórico de Alterações', path: '/admin/historico', icon: History },
+        ]
       : []),
-    { label: 'Histórico de Alterações', path: '/admin/historico', icon: History },
   ]
 
   const handleOpenCliquesModal = async () => {
@@ -301,16 +339,18 @@ export const AdminLayout: React.FC = () => {
               )
             })}
 
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false)
-                handleOpenCliquesModal()
-              }}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition"
-            >
-              <MousePointerClick className="w-4 h-4 text-brand-lilac" />
-              Cliques & Telemetria
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false)
+                  handleOpenCliquesModal()
+                }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-400 hover:text-white hover:bg-neutral-900 transition"
+              >
+                <MousePointerClick className="w-4 h-4 text-brand-lilac" />
+                Cliques & Telemetria
+              </button>
+            )}
 
             <a
               href="/"
@@ -392,13 +432,15 @@ export const AdminLayout: React.FC = () => {
               )
             })}
 
-            <button
-              onClick={handleOpenCliquesModal}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/80 transition"
-            >
-              <MousePointerClick className="w-4 h-4 text-brand-lilac" />
-              Cliques & Telemetria
-            </button>
+            {isAdmin && (
+              <button
+                onClick={handleOpenCliquesModal}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-medium text-neutral-400 hover:text-neutral-200 hover:bg-neutral-900/80 transition"
+              >
+                <MousePointerClick className="w-4 h-4 text-brand-lilac" />
+                Cliques & Telemetria
+              </button>
+            )}
           </nav>
         </div>
 

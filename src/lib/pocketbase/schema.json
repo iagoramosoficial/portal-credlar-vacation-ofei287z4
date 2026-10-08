@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-08T01:16:20.288Z",
+  "generatedAt": "2026-10-08T02:49:12.519Z",
   "collections": [
     {
       "name": "users",
@@ -51,7 +51,7 @@
         "list": "",
         "view": "",
         "create": null,
-        "update": "@request.auth.collectionName = \"usuarios_admin\"",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && (@request.auth.papel = \"admin\" || (@request.auth.papel = \"dho\" && @request.body.nome_empresa:isset = false && @request.body.hero_linha_1:isset = false && @request.body.hero_destaque:isset = false && @request.body.hero_frase:isset = false && @request.body.rodape_parceria:isset = false && @request.body.rodape_metodologia:isset = false && @request.body.rodape_frase_1:isset = false && @request.body.rodape_frase_2:isset = false && @request.body.logo_principal:isset = false && @request.body.logo_secundario:isset = false && @request.body.titulo_pagina:isset = false && @request.body.fuso_horario:isset = false && @request.body.cor_primaria:isset = false && @request.body.cor_secundaria:isset = false && @request.body.cor_destaque:isset = false && @request.body.cor_lilas:isset = false && @request.body.cor_dourado:isset = false && @request.body.cor_fundo_escuro:isset = false && @request.body.cor_fundo_gradiente:isset = false && @request.body.cor_fundo_claro:isset = false && @request.body.mensagem_convite:isset = false && @request.body.url_publica:isset = false && @request.body.hall_titulo:isset = false && @request.body.hall_subtitulo:isset = false && @request.body.mensagem_atualizar_foto:isset = false))",
         "delete": null
       },
       "fields": [
@@ -258,9 +258,9 @@
       "apiRules": {
         "list": "status = \"publicado\" || @request.auth.collectionName = \"usuarios_admin\"",
         "view": "status = \"publicado\" || @request.auth.collectionName = \"usuarios_admin\"",
-        "create": "@request.auth.collectionName = \"usuarios_admin\"",
-        "update": "@request.auth.collectionName = \"usuarios_admin\"",
-        "delete": "@request.auth.collectionName = \"usuarios_admin\""
+        "create": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "update": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "delete": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\""
       },
       "fields": [
         {
@@ -361,8 +361,8 @@
       "name": "cliques",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.collectionName = \"usuarios_admin\"",
-        "view": "@request.auth.collectionName = \"usuarios_admin\"",
+        "list": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
         "create": "",
         "update": null,
         "delete": null
@@ -402,8 +402,8 @@
       "name": "historico",
       "type": "base",
       "apiRules": {
-        "list": "@request.auth.collectionName = \"usuarios_admin\"",
-        "view": "@request.auth.collectionName = \"usuarios_admin\"",
+        "list": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
+        "view": "@request.auth.collectionName = \"usuarios_admin\" && @request.auth.papel = \"admin\"",
         "create": null,
         "update": null,
         "delete": null
