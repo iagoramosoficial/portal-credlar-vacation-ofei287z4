@@ -264,13 +264,35 @@ export const AdminSitePage: React.FC = () => {
                   <Calendar className="w-3.5 h-3.5 text-brand-orange" />
                   Data e Hora de Início (Horário de Brasília)
                 </Label>
-                <Input
-                  id="aviso_inicio"
-                  type="datetime-local"
-                  value={dataInicioLocal}
-                  onChange={(e) => setDataInicioLocal(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="aviso_inicio"
+                    type="datetime-local"
+                    value={dataInicioLocal}
+                    onChange={(e) => setDataInicioLocal(e.target.value)}
+                    className="bg-neutral-950 border-neutral-700 text-white [color-scheme:dark] pr-9 focus:border-brand-orange"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById('aviso_inicio') as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data e hora"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-orange" />
+                  </button>
+                </div>
                 <p className="text-[11px] text-neutral-500">
                   Deixe em branco para exibir imediatamente quando o aviso estiver ativo.
                 </p>
@@ -284,13 +306,35 @@ export const AdminSitePage: React.FC = () => {
                   <Calendar className="w-3.5 h-3.5 text-brand-orange" />
                   Data e Hora de Término (Horário de Brasília)
                 </Label>
-                <Input
-                  id="aviso_fim"
-                  type="datetime-local"
-                  value={dataFimLocal}
-                  onChange={(e) => setDataFimLocal(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="aviso_fim"
+                    type="datetime-local"
+                    value={dataFimLocal}
+                    onChange={(e) => setDataFimLocal(e.target.value)}
+                    className="bg-neutral-950 border-neutral-700 text-white [color-scheme:dark] pr-9 focus:border-brand-orange"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById('aviso_fim') as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data e hora"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-orange" />
+                  </button>
+                </div>
                 <p className="text-[11px] text-neutral-500">
                   Ao selecionar uma data sem hora específica, o aviso permanece até 23:59:59 daquele
                   dia em Brasília.

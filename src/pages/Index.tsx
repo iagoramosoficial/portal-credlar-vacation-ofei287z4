@@ -86,15 +86,13 @@ export default function Index() {
     slotsDisponiveis--
   }
 
-  if (temHallDestaque && slotsDisponiveis > 0) {
-    exibirHall = true
-    slotsDisponiveis--
-  }
-
   if (avisoConfigAtivo && slotsDisponiveis > 0) {
     exibirAviso = true
     slotsDisponiveis--
   }
+
+  // Hall em destaque é seção integrada de encerramento da página inicial (antes do rodapé)
+  exibirHall = temHallDestaque
 
   return (
     <div className="w-full flex flex-col bg-brand-light min-h-screen font-sans overflow-x-hidden selection:bg-brand-red selection:text-white">
@@ -104,9 +102,11 @@ export default function Index() {
 
       <Hero config={config} />
 
+      <FeatureGrid cards={cards} />
+
+      {/* Seção de encerramento: Destaque do Hall da Fama (integrado à Home, antes do rodapé) */}
       {exibirHall && <FaixaDestaqueHall />}
 
-      <FeatureGrid cards={cards} />
       <Footer config={config} />
     </div>
   )

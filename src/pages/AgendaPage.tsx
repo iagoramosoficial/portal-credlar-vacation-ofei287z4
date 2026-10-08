@@ -10,12 +10,14 @@ import {
   CalendarPlus,
   Loader2,
   ChevronDown,
+  Share2,
 } from 'lucide-react'
 import { useConteudoSite } from '@/hooks/use-conteudo-site'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { adminService, EventoItem } from '@/services/adminService'
 import { formatarDataHora } from '@/lib/timezone'
+import { getUrlPublica } from '@/lib/conteudo-padrao'
 import { baixarIcs } from '@/lib/ics'
 import pb from '@/lib/pocketbase/client'
 import credlarLogo from '@/assets/logo-vertical-negativo-branco-vacataion-28a59.png'
@@ -82,6 +84,31 @@ export const AgendaPage: React.FC = () => {
       endDate: ev.data_hora_fim,
       url: ev.link,
     })
+  }
+
+  const handleCompartilharWhatsApp = (ev: EventoItem) => {
+    // Formatar data e hora no fuso configurado
+    const dataHoraFormatada = formatarDataHora(ev.data_hora_inicio)
+    const dataFimFormatada = ev.data_hora_fim ? ` até ${formatarDataHora(ev.data_hora_fim)}` : ''
+
+    // Endereço público configurado da página da agenda
+    const urlBase = getUrlPublica()
+    const urlAgenda = `${urlBase}/agenda`
+
+    let texto = `*${ev.titulo}*\n`
+    texto += `📅 Data/Hora: ${dataHoraFormatada}${dataFimFormatada}\n`
+
+    if (ev.local) {
+      texto += `📍 Local: ${ev.local}\n`
+    }
+    if (ev.link) {
+      texto += `🔗 Link de transmissão: ${ev.link}\n`
+    }
+
+    texto += `\nConfira todos os detalhes e programação na nossa agenda:\n${urlAgenda}`
+
+    const urlZap = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto)}`
+    window.open(urlZap, '_blank', 'noopener,noreferrer')
   }
 
   return (
@@ -179,13 +206,13 @@ export const AgendaPage: React.FC = () => {
                     key={ev.id}
                     className="bg-white rounded-2xl shadow-subtle hover:shadow-elevation transition-all duration-300 border border-neutral-200/90 p-6 md:p-7 flex flex-col md:flex-row gap-6 items-start"
                   >
-                    {/* Imagem quadrada se houver */}
+                    {/* Imagem quadrada SEM CORTE: sempre quadrada inclusive no celular, limitando a largura e usando object-contain */}
                     {imagemUrl ? (
-                      <div className="w-full md:w-44 md:h-44 aspect-square rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0">
+                      <div className="w-full max-w-[200px] sm:max-w-[220px] md:w-44 md:max-w-none aspect-square mx-auto md:mx-0 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200 shrink-0 flex items-center justify-center p-1.5">
                         <img
                           src={imagemUrl}
                           alt={ev.titulo}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-contain"
                         />
                       </div>
                     ) : (
@@ -244,8 +271,17 @@ export const AgendaPage: React.FC = () => {
                         </p>
                       )}
 
-                      {/* Botão Adicionar à Agenda */}
-                      <div className="pt-2 flex items-center gap-3">
+                      {/* Ações do evento: Compartilhar WhatsApp e Adicionar ao meu calendário */}
+                      <div className="pt-2 flex items-center gap-2.5 flex-wrap">
+                        <Button
+                          size="sm"
+                          onClick={() => handleCompartilharWhatsApp(ev)}
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
+                        >
+                          <Share2 className="w-3.5 h-3.5 text-white" />
+                          Compartilhar
+                        </Button>
+
                         <Button
                           size="sm"
                           variant="outline"
@@ -253,7 +289,7 @@ export const AgendaPage: React.FC = () => {
                           className="border-neutral-300 hover:bg-neutral-50 text-neutral-800 text-xs font-semibold gap-1.5 rounded-xl shadow-xs"
                         >
                           <CalendarPlus className="w-3.5 h-3.5 text-neutral-700" />
-                          Adicionar à agenda (.ics)
+                          Adicionar ao meu calendário
                         </Button>
                       </div>
                     </div>
@@ -306,11 +342,13 @@ export const AgendaPage: React.FC = () => {
                       <div className="space-y-3">
                         <div className="flex items-start gap-3">
                           {imagemUrl ? (
-                            <img
-                              src={imagemUrl}
-                              alt={ev.titulo}
-                              className="w-14 h-14 rounded-xl object-cover border border-neutral-200 shrink-0"
-                            />
+                            <div className="w-14 h-14 aspect-square rounded-xl overflow-hidden border border-neutral-200 bg-neutral-100 flex items-center justify-center shrink-0 p-0.5">
+                              <img
+                                src={imagemUrl}
+                                alt={ev.titulo}
+                                className="w-full h-full object-contain"
+                              />
+                            </div>
                           ) : (
                             <div className="w-14 h-14 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-400 shrink-0">
                               <CalendarIcon className="w-6 h-6 text-neutral-400" />

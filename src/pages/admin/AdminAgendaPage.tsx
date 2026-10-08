@@ -43,6 +43,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { useToast } from '@/hooks/use-toast'
+import { ImageCropperModal } from '@/components/ImageCropperModal'
 import pb from '@/lib/pocketbase/client'
 
 export const AdminAgendaPage: React.FC = () => {
@@ -73,6 +74,9 @@ export const AdminAgendaPage: React.FC = () => {
   // Imagem
   const [imagemArquivo, setImagemArquivo] = useState<File | null>(null)
   const [imagemPreview, setImagemPreview] = useState<string | null>(null)
+  const [cropperOpen, setCropperOpen] = useState(false)
+  const [imagemParaRecortar, setImagemParaRecortar] = useState<string | null>(null)
+  const [nomeArquivoOriginal, setNomeArquivoOriginal] = useState('imagem-evento.jpg')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Modal de Exclusão
@@ -119,6 +123,7 @@ export const AdminAgendaPage: React.FC = () => {
     setFormStatus('publicado')
     setImagemArquivo(null)
     setImagemPreview(null)
+    setImagemParaRecortar(null)
     setModalAberto(true)
   }
 
@@ -134,7 +139,9 @@ export const AdminAgendaPage: React.FC = () => {
     setFormDestaque(ev.destaque_home)
     setFormStatus(ev.status)
     setImagemArquivo(null)
-    setImagemPreview(ev.imagem ? pb.files.getURL(ev, ev.imagem) : null)
+    const url = ev.imagem ? pb.files.getURL(ev, ev.imagem) : null
+    setImagemPreview(url)
+    setImagemParaRecortar(url)
     setModalAberto(true)
   }
 
@@ -161,11 +168,24 @@ export const AdminAgendaPage: React.FC = () => {
     }
 
     setImagemArquivo(file)
+    setNomeArquivoOriginal(file.name)
     const reader = new FileReader()
     reader.onload = (ev) => {
-      setImagemPreview(ev.target?.result as string)
+      const dataUrl = ev.target?.result as string
+      setImagemPreview(dataUrl)
+      setImagemParaRecortar(dataUrl)
     }
     reader.readAsDataURL(file)
+  }
+
+  const handleConfirmarRecorte = (croppedFile: File, previewUrl: string) => {
+    setImagemArquivo(croppedFile)
+    setImagemPreview(previewUrl)
+    setCropperOpen(false)
+    toast({
+      title: 'Imagem enquadrada',
+      description: 'A imagem foi ajustada em formato quadrado 1:1 com sucesso.',
+    })
   }
 
   const handleSalvar = async (e: React.FormEvent) => {
@@ -439,11 +459,13 @@ export const AdminAgendaPage: React.FC = () => {
                   {/* Topo do Card com Imagem e Badges */}
                   <div className="flex items-start gap-3.5">
                     {imagemUrl ? (
-                      <img
-                        src={imagemUrl}
-                        alt={ev.titulo}
-                        className="w-16 h-16 rounded-xl object-cover border border-neutral-700 shrink-0"
-                      />
+                      <div className="w-16 h-16 rounded-xl overflow-hidden border border-neutral-700 bg-neutral-950 flex items-center justify-center shrink-0">
+                        <img
+                          src={imagemUrl}
+                          alt={ev.titulo}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
                     ) : (
                       <div className="w-16 h-16 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-neutral-500 shrink-0">
                         <ImageIcon className="w-7 h-7 text-neutral-600" />
@@ -596,17 +618,19 @@ export const AdminAgendaPage: React.FC = () => {
               </Label>
               <div className="flex items-center gap-4">
                 {imagemPreview ? (
-                  <img
-                    src={imagemPreview}
-                    alt="Prévia"
-                    className="w-16 h-16 rounded-xl object-cover border border-neutral-700 shrink-0"
-                  />
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-neutral-700 bg-neutral-950 flex items-center justify-center shrink-0">
+                    <img
+                      src={imagemPreview}
+                      alt="Prévia"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 ) : (
                   <div className="w-16 h-16 rounded-xl bg-neutral-950 border border-neutral-800 flex items-center justify-center text-neutral-500 shrink-0">
                     <ImageIcon className="w-6 h-6" />
                   </div>
                 )}
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -614,16 +638,34 @@ export const AdminAgendaPage: React.FC = () => {
                     onChange={handleSelecionarImagem}
                     className="hidden"
                   />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="border-neutral-800 bg-neutral-950 hover:bg-neutral-800 text-white text-xs"
-                  >
-                    {imagemPreview ? 'Trocar Imagem' : 'Selecionar Imagem'}
-                  </Button>
-                  <p className="text-[11px] text-neutral-500">Formatos aceitos: JPG, PNG ou WEBP</p>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="border-neutral-800 bg-neutral-950 hover:bg-neutral-800 text-white text-xs"
+                    >
+                      {imagemPreview ? 'Trocar Imagem' : 'Selecionar Imagem'}
+                    </Button>
+
+                    {imagemParaRecortar && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setCropperOpen(true)}
+                        className="bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs gap-1"
+                        title="Enquadrar e dar zoom na imagem (1:1)"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-brand-orange" />
+                        Enquadrar Imagem (1:1)
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-neutral-500">
+                    Padrão: imagem inteira sem corte. Use Enquadrar caso prefira recortar e focar.
+                  </p>
                 </div>
               </div>
             </div>
@@ -631,30 +673,82 @@ export const AdminAgendaPage: React.FC = () => {
             {/* Datas */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="data_inicio" className="text-xs font-medium text-neutral-300">
+                <Label
+                  htmlFor="data_inicio"
+                  className="text-xs font-medium text-neutral-300 flex items-center gap-1.5"
+                >
+                  <CalendarIcon className="w-3.5 h-3.5 text-brand-orange" />
                   Data e Hora de Início (Brasília) *
                 </Label>
-                <Input
-                  id="data_inicio"
-                  type="datetime-local"
-                  value={formDataInicio}
-                  onChange={(e) => setFormDataInicio(e.target.value)}
-                  required
-                  className="bg-neutral-950 border-neutral-800 text-white text-xs focus:border-brand-orange"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="data_inicio"
+                    type="datetime-local"
+                    value={formDataInicio}
+                    onChange={(e) => setFormDataInicio(e.target.value)}
+                    required
+                    className="bg-neutral-950 border-neutral-700 text-white text-xs [color-scheme:dark] pr-9 focus:border-brand-orange"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById('data_inicio') as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data e hora"
+                  >
+                    <CalendarIcon className="w-4 h-4 text-brand-orange" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="data_fim" className="text-xs font-medium text-neutral-300">
+                <Label
+                  htmlFor="data_fim"
+                  className="text-xs font-medium text-neutral-300 flex items-center gap-1.5"
+                >
+                  <CalendarIcon className="w-3.5 h-3.5 text-brand-orange" />
                   Data e Hora de Término (opcional)
                 </Label>
-                <Input
-                  id="data_fim"
-                  type="datetime-local"
-                  value={formDataFim}
-                  onChange={(e) => setFormDataFim(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-white text-xs focus:border-brand-orange"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="data_fim"
+                    type="datetime-local"
+                    value={formDataFim}
+                    onChange={(e) => setFormDataFim(e.target.value)}
+                    className="bg-neutral-950 border-neutral-700 text-white text-xs [color-scheme:dark] pr-9 focus:border-brand-orange"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById('data_fim') as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data e hora"
+                  >
+                    <CalendarIcon className="w-4 h-4 text-brand-orange" />
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -798,11 +892,11 @@ export const AdminAgendaPage: React.FC = () => {
           {eventoPrevia && (
             <div className="space-y-4 pt-2">
               {eventoPrevia.imagem && (
-                <div className="w-full h-44 rounded-xl overflow-hidden bg-neutral-950 border border-neutral-800">
+                <div className="w-full max-w-[280px] mx-auto aspect-square rounded-xl overflow-hidden bg-neutral-950 border border-neutral-800 flex items-center justify-center p-2">
                   <img
                     src={pb.files.getURL(eventoPrevia, eventoPrevia.imagem)}
                     alt={eventoPrevia.titulo}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </div>
               )}
@@ -939,6 +1033,17 @@ export const AdminAgendaPage: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Enquadramento 1:1 para imagem do evento */}
+      {cropperOpen && imagemParaRecortar && (
+        <ImageCropperModal
+          open={cropperOpen}
+          imageSrc={imagemParaRecortar}
+          originalFileName={nomeArquivoOriginal}
+          onConfirm={handleConfirmarRecorte}
+          onClose={() => setCropperOpen(false)}
+        />
+      )}
     </div>
   )
 }

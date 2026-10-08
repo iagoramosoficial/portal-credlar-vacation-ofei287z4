@@ -818,27 +818,85 @@ export const AdminHallPage: React.FC = () => {
             {/* Vigência: Publicar Em e Expira Em */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-200">
+                <label
+                  htmlFor="hall_publicar_em"
+                  className="text-xs font-semibold text-neutral-200 flex items-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-brand-gold" />
                   Publicar em (Início)
                 </label>
-                <Input
-                  type="date"
-                  value={formPublicarEm}
-                  onChange={(e) => setFormPublicarEm(e.target.value)}
-                  className="bg-neutral-800/80 border-neutral-700 text-white text-xs"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="hall_publicar_em"
+                    type="date"
+                    value={formPublicarEm}
+                    onChange={(e) => setFormPublicarEm(e.target.value)}
+                    className="bg-neutral-950 border-neutral-700 text-white text-xs [color-scheme:dark] pr-9 focus:border-brand-gold"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById(
+                        'hall_publicar_em',
+                      ) as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-gold" />
+                  </button>
+                </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-200">
+                <label
+                  htmlFor="hall_expira_em"
+                  className="text-xs font-semibold text-neutral-200 flex items-center gap-1.5"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-brand-gold" />
                   Expira em (Término Sugerido)
                 </label>
-                <Input
-                  type="date"
-                  value={formExpiraEm}
-                  onChange={(e) => setFormExpiraEm(e.target.value)}
-                  className="bg-neutral-800/80 border-neutral-700 text-white text-xs"
-                />
+                <div className="relative flex items-center">
+                  <Input
+                    id="hall_expira_em"
+                    type="date"
+                    value={formExpiraEm}
+                    onChange={(e) => setFormExpiraEm(e.target.value)}
+                    className="bg-neutral-950 border-neutral-700 text-white text-xs [color-scheme:dark] pr-9 focus:border-brand-gold"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    onClick={() => {
+                      const el = document.getElementById(
+                        'hall_expira_em',
+                      ) as HTMLInputElement | null
+                      try {
+                        if (el && 'showPicker' in el) {
+                          ;(el as any).showPicker()
+                        } else {
+                          el?.focus()
+                        }
+                      } catch {
+                        el?.focus()
+                      }
+                    }}
+                    className="absolute right-2.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                    title="Abrir seletor de data"
+                  >
+                    <Calendar className="w-4 h-4 text-brand-gold" />
+                  </button>
+                </div>
               </div>
             </div>
 
