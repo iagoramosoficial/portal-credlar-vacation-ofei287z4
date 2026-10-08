@@ -32,6 +32,8 @@ export interface ConfiguracoesSite {
   // Etapa 1E
   hall_titulo?: string
   hall_subtitulo?: string
+  // Etapa 1F
+  mensagem_atualizar_foto?: string
 }
 
 /**
@@ -130,6 +132,8 @@ export const CONFIGURACOES_PADRAO: ConfiguracoesSite = {
   url_publica: '',
   hall_titulo: 'Hall da Fama',
   hall_subtitulo: '',
+  mensagem_atualizar_foto:
+    'Olá, {nome}! Para ajustar a sua foto no Hall da Fama, acesse: {link}. É só arrastar e dar zoom até o rosto ficar centralizado.',
   ...CORES_PADRAO_HEX,
 }
 
@@ -185,11 +189,11 @@ export const CARDS_PADRAO: CardHome[] = [
     descricao:
       'Fique por dentro dos próximos encontros, terapias em grupo, workshops e eventos corporativos.',
     icone: 'Calendar',
-    selo_texto: 'Em Breve',
-    selo_estilo: 'gradiente',
-    texto_botao: 'Aguarde',
-    link: '#',
-    clicavel: false,
+    selo_texto: '',
+    selo_estilo: '',
+    texto_botao: 'Ver Agenda',
+    link: '/agenda',
+    clicavel: true,
     cor_icone: 'padrao',
     ordem: 4,
     status: 'publicado',

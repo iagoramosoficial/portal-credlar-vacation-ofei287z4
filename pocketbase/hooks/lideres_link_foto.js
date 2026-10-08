@@ -57,11 +57,10 @@ routerAdd(
       })
     }
 
-    // Obter url_publica, mensagem_convite e fuso_horario de configuracoes_site
+    // Obter url_publica e mensagem_atualizar_foto de configuracoes_site
     let urlPublicaConfig = ''
-    let mensagemConviteTemplate =
-      'Olá, {nome}! Você foi convidado(a) para o Hall da Fama da UniCredlar. Para completar seu cadastro e autorizar o uso da sua foto, acesse: {link} (válido até {validade}).'
-    let fuso = 'America/Sao_Paulo'
+    let mensagemAtualizarFotoTemplate =
+      'Olá, {nome}! Para ajustar a sua foto no Hall da Fama, acesse: {link}. É só arrastar e dar zoom até o rosto ficar centralizado.'
 
     try {
       const configs = $app.findRecordsByFilter('configuracoes_site', '', '', 1, 0)
@@ -70,13 +69,9 @@ routerAdd(
         if (u && u.trim()) {
           urlPublicaConfig = u.trim()
         }
-        const m = configs[0].getString('mensagem_convite')
+        const m = configs[0].getString('mensagem_atualizar_foto')
         if (m && m.trim()) {
-          mensagemConviteTemplate = m
-        }
-        const f = configs[0].getString('fuso_horario')
-        if (f && f.trim()) {
-          fuso = f.trim()
+          mensagemAtualizarFotoTemplate = m
         }
       }
     } catch (cfgErr) {
@@ -97,58 +92,27 @@ routerAdd(
     }
 
     if (!baseUrl) {
-      baseUrl = 'https://www.credlarvacation.xdreams.com.br'
+      return e.json(400, {
+        message:
+          'O endereço público do site não está configurado. Por favor, acesse o painel em Marca & Configurações e informe o campo "Endereço público do site".',
+      })
     }
 
     baseUrl = baseUrl.replace(/\/+$/, '')
     const linkCompleto = baseUrl + '/cadastro/' + encodeURIComponent(token.trim())
 
-    // Formatar validade no formato DD/MM/AAAA
-    let validadeFormatada = ''
-    const conviteExpiraEm = lider.getString('convite_expira_em')
-    if (conviteExpiraEm && conviteExpiraEm.trim()) {
-      try {
-        const d = new Date(conviteExpiraEm)
-        if (!isNaN(d.getTime())) {
-          const dtf = new Intl.DateTimeFormat('pt-BR', {
-            timeZone: fuso,
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric',
-          })
-          validadeFormatada = dtf.format(d)
-        }
-      } catch (_) {
-        // Fallback básico caso Intl com fuso falhe
-        try {
-          const d = new Date(conviteExpiraEm)
-          const dia = String(d.getUTCDate()).padStart(2, '0')
-          const mes = String(d.getUTCMonth() + 1).padStart(2, '0')
-          const ano = d.getUTCFullYear()
-          validadeFormatada = dia + '/' + mes + '/' + ano
-        } catch (_) {}
-      }
-    }
-
-    if (!validadeFormatada) {
-      validadeFormatada = 'indeterminada'
-    }
-
     const nomeLider = lider.getString('nome_exibicao') || lider.getString('nome') || 'Líder'
 
-    // Montar mensagem pronta para WhatsApp
-    const mensagemFinal = mensagemConviteTemplate
+    // Montar mensagem pronta para WhatsApp baseada em mensagem_atualizar_foto, sem citar validade
+    const mensagemFinal = mensagemAtualizarFotoTemplate
       .split('{nome}')
       .join(nomeLider)
       .split('{link}')
       .join(linkCompleto)
-      .split('{validade}')
-      .join(validadeFormatada)
 
     return e.json(200, {
       link: linkCompleto,
       mensagem: mensagemFinal,
-      validade: validadeFormatada,
       nome: nomeLider,
     })
   },

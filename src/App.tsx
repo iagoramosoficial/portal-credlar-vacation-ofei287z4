@@ -21,6 +21,9 @@ import { AdminHallPage } from '@/pages/admin/AdminHallPage'
 import PrivacidadePage from './pages/PrivacidadePage'
 import CadastroLiderPage from './pages/CadastroLiderPage'
 import HallDaFamaPage from './pages/HallDaFamaPage'
+import AgendaPage from './pages/AgendaPage'
+import RedirecionamentoLinkCurtoPage from './pages/RedirecionamentoLinkCurtoPage'
+import { AdminAgendaPage } from './pages/admin/AdminAgendaPage'
 
 // ONLY IMPORT AND RENDER WORKING PAGES, NEVER ADD PLACEHOLDER COMPONENTS OR PAGES IN THIS FILE
 // AVOID REMOVING ANY CONTEXT PROVIDERS FROM THIS FILE (e.g. TooltipProvider, Toaster, Sonner)
@@ -37,9 +40,13 @@ const App = () => (
             {/* Rotas Públicas */}
             <Route element={<Layout />}>
               <Route path="/" element={<Index />} />
+              <Route path="/agenda" element={<AgendaPage />} />
               <Route path="/privacidade" element={<PrivacidadePage />} />
               <Route path="/hall-da-fama" element={<HallDaFamaPage />} />
             </Route>
+
+            {/* Rota Pública de Redirecionamento de Link Curto */}
+            <Route path="/r/:apelido" element={<RedirecionamentoLinkCurtoPage />} />
 
             {/* Rota Pública de Cadastro e Autorização de Imagem */}
             <Route path="/cadastro/:token" element={<CadastroLiderPage />} />
@@ -50,6 +57,7 @@ const App = () => (
             {/* Rotas Protegidas do Painel /admin */}
             <Route element={<AdminLayout />}>
               <Route path="/admin" element={<AdminHomePage />} />
+              <Route path="/admin/agenda" element={<AdminAgendaPage />} />
               <Route path="/admin/hall" element={<AdminHallPage />} />
               <Route path="/admin/lideres" element={<AdminLideresPage />} />
               <Route path="/admin/site" element={<AdminSitePage />} />

@@ -3,7 +3,10 @@
 // 1. Arquivar automaticamente homenagens cujo expira_em tenha vencido:
 //    - expira_em vale até o FIM do dia informado (23:59:59.999 no fuso de configuracoes_site)
 //    - se agora no fuso ultrapassou o fim do dia de expira_em, altera status para 'arquivado' e destaque_home para false
-// 2. Desativa destaque_home quando expirar ou arquivar.
+// 2. Arquivar automaticamente eventos cuja data de término (ou início, quando não houver término) já passou no fuso configurado:
+//    - data_hora_fim ou data_hora_inicio ultrapassou agoraMs
+//    - altera status para 'arquivado' e destaque_home para false
+// 3. Desativa destaque_home quando expirar ou arquivar.
 cronAdd('hall_da_fama_vigencia_diaria', '0 3 * * *', () => {
   const agoraMs = Date.now()
   console.log('Executando cron hall_da_fama_vigencia_diaria em:', new Date().toISOString())
@@ -109,6 +112,44 @@ cronAdd('hall_da_fama_vigencia_diaria', '0 3 * * *', () => {
         'Cron Hall da Fama: ' +
           totalArquivadas +
           ' homenagens arquivadas por validade no fuso ' +
+          fuso +
+          '.',
+      )
+    }
+
+    // 2. Arquivar eventos passados da coleção eventos
+    // Busca eventos publicados
+    const eventosPublicados = $app.findRecordsByFilter(
+      'eventos',
+      "status = 'publicado'",
+      '',
+      500,
+      0,
+    )
+
+    let totalEventosArquivados = 0
+    for (let j = 0; j < eventosPublicados.length; j++) {
+      const ev = eventosPublicados[j]
+      const dataFim = ev.getString('data_hora_fim')
+      const dataInicio = ev.getString('data_hora_inicio')
+      const dataReferencia = dataFim && dataFim.trim() ? dataFim : dataInicio
+
+      if (dataReferencia && dataReferencia.trim()) {
+        const refMs = parseDateToUtcMs(dataReferencia, false)
+        if (refMs !== null && agoraMs > refMs) {
+          ev.set('status', 'arquivado')
+          ev.set('destaque_home', false)
+          $app.save(ev)
+          totalEventosArquivados++
+        }
+      }
+    }
+
+    if (totalEventosArquivados > 0) {
+      console.log(
+        'Cron Eventos: ' +
+          totalEventosArquivados +
+          ' eventos passados arquivados no fuso ' +
           fuso +
           '.',
       )

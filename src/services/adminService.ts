@@ -120,6 +120,34 @@ export interface HallArquivoPaginado {
   totalPages: number
 }
 
+export type EventoStatus = 'rascunho' | 'publicado' | 'arquivado'
+
+export interface EventoItem {
+  id: string
+  titulo: string
+  descricao?: string
+  imagem?: string
+  data_hora_inicio: string
+  data_hora_fim?: string
+  local?: string
+  link?: string
+  link_fotos?: string
+  destaque_home: boolean
+  status: EventoStatus
+  created: string
+  updated: string
+}
+
+export interface LinkCurtoItem {
+  id: string
+  apelido: string
+  destino: string
+  descricao?: string
+  ativo: boolean
+  created: string
+  updated: string
+}
+
 export const adminService = {
   // Configurações do site
   async getConfiguracoes(): Promise<ConfiguracoesSite & { id: string }> {
@@ -375,5 +403,68 @@ export const adminService = {
     } catch {
       return { items: [], totalItems: 0, page, perPage, totalPages: 0 }
     }
+  },
+
+  // Eventos (Admin e Público)
+  async getEventosPublicados(): Promise<EventoItem[]> {
+    const list = await pb.collection('eventos').getFullList<EventoItem>({
+      filter: 'status = "publicado"',
+      sort: 'data_hora_inicio',
+    })
+    return list
+  },
+
+  async getEventosAdmin(): Promise<EventoItem[]> {
+    const list = await pb.collection('eventos').getFullList<EventoItem>({
+      sort: '-data_hora_inicio',
+    })
+    return list
+  },
+
+  async createEvento(data: FormData | Partial<EventoItem>): Promise<EventoItem> {
+    const created = await pb
+      .collection('eventos')
+      .create<EventoItem>(data as Record<string, unknown>)
+    return created
+  },
+
+  async updateEvento(id: string, data: FormData | Partial<EventoItem>): Promise<EventoItem> {
+    const updated = await pb
+      .collection('eventos')
+      .update<EventoItem>(id, data as Record<string, unknown>)
+    return updated
+  },
+
+  async deleteEvento(id: string): Promise<boolean> {
+    await pb.collection('eventos').delete(id)
+    return true
+  },
+
+  // Links Curtos (Admin)
+  async getLinksCurtos(): Promise<LinkCurtoItem[]> {
+    const list = await pb.collection('links_curtos').getFullList<LinkCurtoItem>({
+      sort: '-created',
+    })
+    return list
+  },
+
+  async createLinkCurto(data: {
+    apelido: string
+    destino: string
+    descricao?: string
+    ativo?: boolean
+  }): Promise<LinkCurtoItem> {
+    const created = await pb.collection('links_curtos').create<LinkCurtoItem>(data)
+    return created
+  },
+
+  async updateLinkCurto(id: string, data: Partial<LinkCurtoItem>): Promise<LinkCurtoItem> {
+    const updated = await pb.collection('links_curtos').update<LinkCurtoItem>(id, data)
+    return updated
+  },
+
+  async deleteLinkCurto(id: string): Promise<boolean> {
+    await pb.collection('links_curtos').delete(id)
+    return true
   },
 }

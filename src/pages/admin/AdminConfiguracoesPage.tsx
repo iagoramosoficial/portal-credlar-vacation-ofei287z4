@@ -7,6 +7,7 @@ import { formatarDataHora, setAppTimezone } from '@/lib/timezone'
 import { aplicarCoresCss } from '@/lib/theme'
 import { pb } from '@/lib/pocketbase'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -236,6 +237,8 @@ export const AdminConfiguracoesPage: React.FC = () => {
       formData.append('nome_empresa', marcaData.nome_empresa || '')
       formData.append('titulo_pagina', marcaData.titulo_pagina || '')
       formData.append('url_publica', marcaData.url_publica || '')
+      formData.append('mensagem_convite', marcaData.mensagem_convite || '')
+      formData.append('mensagem_atualizar_foto', marcaData.mensagem_atualizar_foto || '')
       formData.append('cor_primaria', marcaData.cor_primaria || '#CC1F1F')
       formData.append('cor_secundaria', marcaData.cor_secundaria || '#E85C1A')
       formData.append('cor_destaque', marcaData.cor_destaque || '#F5A623')
@@ -648,6 +651,29 @@ export const AdminConfiguracoesPage: React.FC = () => {
                   <p className="text-[11px] text-neutral-400">
                     Usado para montar os links enviados aos colaboradores. Ex.:
                     https://seusite.com.br
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 md:col-span-2 pt-2 border-t border-neutral-800/80">
+                  <Label
+                    htmlFor="mensagem_atualizar_foto"
+                    className="text-xs font-medium text-neutral-300"
+                  >
+                    Mensagem para Atualização de Foto (WhatsApp)
+                  </Label>
+                  <Textarea
+                    id="mensagem_atualizar_foto"
+                    rows={3}
+                    value={marcaData.mensagem_atualizar_foto || ''}
+                    onChange={(e) =>
+                      setMarcaData((prev) => ({ ...prev, mensagem_atualizar_foto: e.target.value }))
+                    }
+                    placeholder="Olá, {nome}! Para ajustar a sua foto no Hall da Fama, acesse: {link}. É só arrastar e dar zoom até o rosto ficar centralizado."
+                    className="bg-neutral-950 border-neutral-800 text-white focus:border-brand-orange text-xs"
+                  />
+                  <p className="text-[11px] text-neutral-400">
+                    Variáveis disponíveis: <strong className="text-neutral-300">{'{nome}'}</strong>{' '}
+                    e <strong className="text-neutral-300">{'{link}'}</strong>. Não cita validade.
                   </p>
                 </div>
               </div>

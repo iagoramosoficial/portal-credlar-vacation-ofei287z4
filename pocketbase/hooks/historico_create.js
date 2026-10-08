@@ -48,4 +48,6 @@ onRecordCreateRequest(
   'termos',
   'lideres',
   'hall_da_fama',
+  'eventos',
+  'links_curtos',
 )

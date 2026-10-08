@@ -6,6 +6,7 @@ import {
   Globe,
   Layers,
   Users,
+  Calendar,
   History,
   LogOut,
   Menu,
@@ -158,9 +159,10 @@ export const AdminLayout: React.FC = () => {
 
   const navItems: Array<{ label: string; path: string; icon: React.ElementType }> = [
     { label: 'Início', path: '/admin', icon: LayoutDashboard },
+    { label: 'Agenda de Eventos', path: '/admin/agenda', icon: Calendar },
     { label: 'Hall da Fama', path: '/admin/hall', icon: Trophy },
     { label: 'Líderes', path: '/admin/lideres', icon: Users },
-    { label: 'Textos do Site', path: '/admin/site', icon: Globe },
+    { label: 'Textos & Links', path: '/admin/site', icon: Globe },
     { label: 'Cards da Home', path: '/admin/cards', icon: Layers },
     ...(isAdmin
       ? [{ label: 'Marca & Configurações', path: '/admin/configuracoes', icon: Sliders }]

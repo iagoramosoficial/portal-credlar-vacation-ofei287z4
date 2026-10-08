@@ -146,8 +146,8 @@ export const HallDaFamaPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Hero do Hall */}
-      <section className="bg-gradient-to-b from-neutral-950 via-neutral-900 to-brand-light pt-14 pb-20 px-4 relative overflow-hidden">
+      {/* Hero do Hall com faixa escura bem definida e transição limpa */}
+      <section className="bg-neutral-950 text-white border-b border-neutral-800/80 pt-12 pb-14 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-radial-gradient from-brand-gold/10 via-transparent to-transparent pointer-events-none" />
         <div className="max-w-4xl mx-auto text-center relative z-10 space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-gold/15 text-brand-gold border border-brand-gold/30 text-xs font-bold uppercase tracking-wider shadow-sm">
@@ -165,18 +165,18 @@ export const HallDaFamaPage: React.FC = () => {
         </div>
       </section>
 
-      {/* Conteúdo Principal */}
-      <main className="flex-1 container mx-auto px-4 -mt-10 mb-20 max-w-6xl relative z-20">
+      {/* Conteúdo Principal sobre fundo claro */}
+      <main className="flex-1 container mx-auto px-4 py-10 mb-16 max-w-6xl relative z-20">
         {carregandoVigentes ? (
-          <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200/80 p-16 flex flex-col items-center justify-center text-neutral-400 gap-3">
-            <Loader2 className="w-8 h-8 text-brand-gold animate-spin" />
+          <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200/80 p-16 flex flex-col items-center justify-center text-neutral-500 gap-3">
+            <Loader2 className="w-8 h-8 text-neutral-700 animate-spin" />
             <p className="text-sm font-medium">Carregando homenagens...</p>
           </div>
         ) : vigentes.length === 0 ? (
           /* Estado vazio elegante */
           <div className="bg-white rounded-2xl shadow-subtle border border-neutral-200/80 p-12 md:p-16 text-center max-w-2xl mx-auto space-y-5">
-            <div className="w-16 h-16 rounded-2xl bg-brand-gold/10 border border-brand-gold/25 flex items-center justify-center mx-auto text-brand-gold shadow-inner">
-              <Trophy className="w-8 h-8 text-brand-gold" />
+            <div className="w-16 h-16 rounded-2xl bg-neutral-100 border border-neutral-200 flex items-center justify-center mx-auto text-neutral-800 shadow-inner">
+              <Trophy className="w-8 h-8 text-neutral-700" />
             </div>
             <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">
               Novas homenagens em breve
@@ -200,12 +200,12 @@ export const HallDaFamaPage: React.FC = () => {
           <div className="space-y-8">
             <div className="flex items-center justify-between pb-2 border-b border-neutral-200">
               <div className="flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-brand-gold" />
+                <Sparkles className="w-5 h-5 text-neutral-700" />
                 <h2 className="text-xl md:text-2xl font-bold text-neutral-900 tracking-tight">
                   Homenageados em Destaque
                 </h2>
               </div>
-              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-gold/15 text-brand-gold border border-brand-gold/30">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-neutral-100 text-neutral-800 border border-neutral-300 shadow-xs">
                 {vigentes.length} {vigentes.length === 1 ? 'homenagem' : 'homenagens'}
               </span>
             </div>
